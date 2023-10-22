@@ -4,12 +4,12 @@
 
 ## Project Components
 * [ER: Requirements Specification](https://git.fe.up.pt/lbaw/lbaw2324/lbaw2345/-/wikis/ER:-Requirements-Specification-Component)
-* EBD: Database Specification
+* [EBD: Database Specification](https://git.fe.up.pt/lbaw/lbaw2324/lbaw2345/-/wikis/EBD:-Database-Specification-Component)
 * EAP: Architecture Specification and Prototype
 * PA: Product and Presentation
 
 ## Artifacts Checklist
-The artifacts checklist is available [here](https://docs.google.com/spreadsheets/d/1Mk1fHlnKoJM_UYQxEJXZikpqAuWzrNG51LcxdtTcTDE/edit?pli=1#gid=537406521)
+The artifacts checklist is available [here](https://docs.google.com/spreadsheets/d/1mZ5Di_Jd3fzfUgeTogHDQ6Kw6VKKF-9Uu21p_dkstKI/edit#gid=537406521)
 
 ## Team
 * Carlos Manuel da Silva Costa
@@ -22,4 +22,4 @@ The artifacts checklist is available [here](https://docs.google.com/spreadsheets
   - Email: [up202108861@up.pt](mailto:up202108861@up.pt)
 
 ***
-Group: GROUP2345, 24/09/2023
+Group: GROUP2345, 02/10/2023

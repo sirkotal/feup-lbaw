@@ -1,6 +1,4 @@
-# Project Vision
-
-## A1: Cappuccino
+# A1: Cappuccino
 
 Developed by FEUP students, Cappuccino is a project aimed at developing an online grocery shop, marketed for users that wish to do their grocery shopping online in a more convenient, user-friendly way.
  
@@ -22,7 +20,7 @@ This artifact defines the actors and respective user stories to better comprehen
 
 For the online shop Cappuccino, the actors are represented in the figure below:
 
-![lbaw_actors_v2](uploads/9b616068a2e23b1ecbdaa1bb5a5a3c33/lbaw_actors_v2.png "Figure 1: Actors.")
+![lbaw_actors_v2](images/lbaw_actors_v2.png "Figure 1: Actors.")
 
 *Figure 1: Actors.*
 
@@ -672,7 +670,7 @@ This aims to share information in order to enhance user understanding, navigatio
 
 Sitemap presenting the overall structure of the web application.
 
-![aaa](uploads/1d7a83de97e5c83f4f9cf3ab863fd8f7/aaa.jpg)
+![sitemap](images/sitemap.png)
 
 *Figure 2: Sitemap.*
 
@@ -682,19 +680,19 @@ Following images are wireframes demonstrating what structure some of our pages w
 
 #### UI01: Main Page
 
-![image](uploads/8bd9d50ea01d9131b71afba01de96a77/image.png)
+![image](images/main_page.png)
 
 *Figure 3: Main Page.*
 
 #### UI02: Product Page
 
-![Image](uploads/7c585bbf634c8787de167fdf7f836ac6/Image.png)
+![Image](images/product_page.png)
 
 *Figure 4: Product Page.*
 
 #### UI03: Search Page
 
-![image](uploads/b8ede075497b88271683c84cf3721446/image.png)
+![image](images/search_page.png)
 
 *Figure 5: Search Page.*
 
@@ -703,7 +701,7 @@ Following images are wireframes demonstrating what structure some of our pages w
 Changes made to the first submission:
 
 
-**GROUP45, 01/10/2023**
+**GROUP45, 16/10/2023**
 
 - Carlos Manuel da Silva Costa
   - Email: up202004151@up.pt
