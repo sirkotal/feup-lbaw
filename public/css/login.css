@@ -1,0 +1,110 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+#content {
+    align-items: center;
+}
+
+.login-page {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    align-items: center;
+}
+
+.left-login {
+    flex: 1;
+    background-color: #00754D;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    align-items: center;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.left-login h1 {
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+.right-login {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    gap: 2rem;
+    background-color: #D9D9D9;
+    padding: 20px;
+}
+
+.right-login h1 {
+    color: black;
+    text-align: center;
+    font-family: serif;
+    font-weight: bold;
+    font-size: 40px;
+}
+
+.right-login form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.right-login #email, .right-login #password {
+    display: block;
+    background-color: #D9D9D9;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid black;
+    padding: 0.25rem;
+    margin-top: 0.5rem;
+    width: 65%;
+}
+
+#email::placeholder {
+    color: black;
+}
+
+#password::placeholder {
+    color: black;
+}
+
+.button-container {
+    display: flex;
+    align-items: center;
+}
+
+.right-login #login-button {
+    background-color: #D9D9D9;
+    margin: auto;
+    border-radius: 20px;
+    color: black;
+    font-weight: bold;
+    border: 1px solid black;
+    padding: 1rem 2rem;
+    align-items: center;
+}
+
+.right-login #login-button:hover {
+    cursor: pointer;
+    background-color: #00754D;
+    transition: 0.5s;
+    color: white;
+}
+
+.button-container a {
+    text-decoration: none;
+}
+
+.button-container > a::before {
+    content: 'Do not have an account? ';
+    color: black;
+}

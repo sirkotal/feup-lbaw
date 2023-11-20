@@ -1,0 +1,1529 @@
+
+openapi: 3.0.0
+
+info:
+ version: '1.0'
+ title: 'LBAW Cappuccino Web API'
+ description: 'Web Resources Specification (A7) for Cappuccino'
+
+servers:
+- url: http://lbaw.fe.up.pt
+- description: Production server
+
+externalDocs:
+ description: Find more info here.
+ url: https://git.fe.up.pt/lbaw/lbaw2324/lbaw2345/-/wikis/eap#a7-web-resources-specification
+
+tags:
+ - name: 'M01: Authentication'
+ - name: 'M02: User and Notifications'
+ - name: 'M03: Products'
+ - name: 'M04: Search'
+ - name: 'M05: Static Pages'
+ - name: 'M06: Administration'
+
+paths:
+
+#AUTHENTICATION - M01
+
+ /register:
+   get:
+     operationId: R101
+     summary: 'R101: Register Form'
+     description: 'Provide new user registration form. Access: PUB'
+     tags:
+       - 'M01: Authentication'
+     responses:
+       '200':
+         description: 'Ok. Show Sign-Up UI'
+
+   post:
+     operationId: R102
+     summary: 'R102: Register Action'
+     description: 'Processes the new user registration form submission. Access: PUB'
+     tags:
+       - 'M01: Authentication'
+
+     requestBody:
+       required: true
+       content:
+         application/x-www-form-urlencoded:
+           schema:
+             type: object
+             properties:
+               name:
+                 type: string
+               email:
+                 type: string
+                 format: email
+               password:
+                 type: string
+                 format: password
+               date_of_birth:
+                 type: string
+                 format: date
+               confirm_password:
+                 type: string
+                 format: password
+             required:
+              - name
+              - email
+              - date_of_birth
+              - password
+              - confirm_password
+
+     responses:
+       '302':
+         description: 'Redirect after processing the new user information.'
+         headers:
+           Location:
+             schema:
+               type: string
+             examples:
+               302Success:
+                 description: 'Successful authentication. Redirect to user profile.'
+                 value: '/login'
+               302Failure:
+                 description: 'Failed authentication. Redirect to login form.'
+                 value: '/register'
+
+ /login:
+
+   get:
+     operationId: R103
+     summary: 'R103: Login Form'
+     description: 'Provide login form. Access: PUB'
+     tags:
+       - 'M01: Authentication'
+     responses:
+       '200':
+         description: 'Ok. Show Log-in UI'
+   post:
+     operationId: R104
+     summary: 'R104: Login Action'
+     description: 'Processes the login form submission. Access: PUB'
+     tags:
+       - 'M01: Authentication'
+
+     requestBody:
+       required: true
+       content:
+         application/x-www-form-urlencoded:
+           schema:
+             type: object
+             properties:
+               email:          
+                 type: string
+                 format: email
+               password:    
+                 type: string
+                 format: password
+             required:
+                  - email
+                  - password
+
+     responses:
+       '302':
+         description: 'Redirect after processing the login credentials.'
+         headers:
+           Location:
+             schema:
+               type: string
+             examples:
+               302Success:
+                 description: 'Successful authentication. Redirect to user profile.'
+                 value: '/homepage'
+               302Error:
+                 description: 'Failed authentication. Redirect to login form.'
+                 value: '/login'
+
+ /logout:
+
+   post:
+     operationId: R105
+     summary: 'R105: Logout Action'
+     description: 'Logout the current authenticated user. Access: USR, ADM'
+     tags:
+       - 'M01: Authentication'
+     responses:
+       '302':
+         description: 'Redirect after processing logout.'
+         headers:
+           Location:
+             schema:
+               type: string
+             examples:
+               302Success:
+                 description: 'Successful logout. Redirect to login form.'
+                 value: '/login'
+
+
+ /send_email_verification:
+
+    post:
+      operationId: R106
+      summary: 'R106 : Send Email'
+      description: 'Sends a validation email to confirm the account. Access: VST'
+      tags:
+        - 'M01: Authentication'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                e-mail:
+                  type: string 
+              required:
+                - email
+               
+      responses:
+        '200':
+          description: 'Success you have received a validation email.'
+        '404':
+          description: 'Error. The email does not exist.'
+
+ /recoverPassword:
+
+    post:
+      operationId: R107
+      summary: 'R107: Recover Password'
+      description: 'Changes the password to a new one through the token received in the email. Access: VST'
+      tags:
+        - 'M01: Authentication'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                confirm_password:
+                  type: string
+                  format: password
+              required:
+                - token
+                - password
+                - confirm_password;
+
+      responses:
+        '200':
+          description: 'Success. Your password has been changed successfully.'
+        '404':
+          description: 'Error. Token was not found.'
+
+#USER - M02
+
+ /user/{id}:
+
+   get:
+     operationId: R201
+     summary: 'R201: View user profile'
+     description: 'Show the individual user profile. Access: USR'
+     tags:
+       - 'M02: User and Notifications'
+    
+    parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the user.'
+
+     responses:
+       '200':
+         description: 'Ok. Show User Profile UI'
+       '403':
+         description: 'Failed, user not logged in.'
+
+ /user/edit_profile:
+
+   get:
+     operationId: R202
+     summary: 'R202: Edit Profile Form'
+     description: 'Provide edit profile form. Access: USR'
+     tags:
+       - 'M02: User and Notifications'
+       
+     responses:
+       '200':
+         description: 'Ok. Show Edit Profile UI'
+       '403':
+         description: 'Failed, user not logged in.'
+   post:
+     operationId: R203
+     summary: 'R203: Edit Profile Action'
+     description: 'Processes the edit profile form submission. Access: USR'
+     tags:
+       - 'M02: User and Notifications'
+     
+     requestBody:
+       required: true
+       content:
+         application/x-www-form-urlencoded:
+           schema:
+             type: object
+             properties:
+               name:          
+                 type: string
+               image_path:
+                 type: string
+                 format: binary
+               email:
+                 type: string
+                 format: email
+               password:    
+                 type: string
+                 format: password
+             required:
+                  - name
+                  - email
+                  - image_path
+                  - password
+
+     responses:
+       '302':
+         description: 'Redirect after processing the edit profile changes.'
+         headers:
+           Location:
+             schema:
+               type: string
+             examples:
+               302Success:
+                 description: 'Successful edit. Redirect to user profile.'
+                 value: '/user'
+               302Error:
+                 description: 'Failed edit. Redirect to edit profile form.'
+                 value: '/user/edit_profile'
+                 
+ /user/{id}/wishlist:
+
+   get:
+     operationId: R204
+     summary: 'R204: View user wishlist'
+     description: 'Show the individual user wishlist. Access: USR'
+     tags:
+       - 'M02: User and Notifications'
+    
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the user.'
+
+     responses:
+       '200':
+         description: 'Ok. Show User Wishlist UI'
+       '403':
+         description: 'Failed, user not logged in.'
+
+ /shopping-cart:
+
+   get:
+     operationId: R205
+     summary: 'R205: View user shopping cart'
+     description: 'Show the individual user shopping cart. Access: USR'
+     tags:
+       - 'M02: User and Notifications'
+
+     responses:
+       '200':
+         description: 'Ok. Show User Shopping Cart UI'
+       '403':
+         description: 'Failed, user not logged in.'
+      
+   post:
+    operationId: R206
+    summary: 'R206: Add more of a product to the user shopping cart'
+    description: 'Add more of a product to the users shopping cart. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+            required:
+              - productId
+              - quantity
+      responses:
+      '201':
+        description: 'Product added to the shopping cart.'
+      '401':
+        description: 'Unauthorized. User not logged in.'
+      '404':
+        description: 'Not Found. The product does not exist.'
+  
+   delete:
+    operationId: R207
+    summary: 'R207: Remove Product from Shopping Cart'
+    description: 'Remove a product from the users shopping cart. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              productId:
+                type: integer
+            required:
+              - productId
+
+    responses:
+      '204':
+        description: 'Product removed from the shopping cart.'
+      '401':
+        description: 'Unauthorized. User not logged in.'
+      '404':
+        description: 'Not Found. The product does not exist in the shopping cart.'
+
+ /checkout:
+
+   get:
+     operationId: R208
+     summary: 'R208: View checkout'
+     description: 'Show the checkout. Access: USR'
+     tags:
+       - 'M02: User and Notifications'
+
+     responses:
+       '200':
+         description: 'Ok. Show User Checkout Page UI'
+       '403':
+         description: 'Failed, user not logged in.'
+
+   post:
+      operationId: R209
+      summary: 'R209: Complete Checkout'
+      description: 'Submit the users payment information to complete the checkout process.'
+      tags:
+        - 'M02: User and Notifications'
+
+      requestBody:
+        description: 'Payment Information'
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paymentMethod:
+                  type: string
+                  enum: ['Paypal', 'MBWAY', 'Credit Card', 'Bank Transfer']
+                orderId:
+                  type: integer
+              required:
+                - paymentMethod
+                - orderId
+      responses:
+      '201':
+        description: 'Order completed.'
+      '400':
+        description: 'Bad Request. Invalid Payment Information.'
+      '401':
+        description: 'Unauthorized. User not logged in.'
+      '403':
+        description: 'Forbidden. Insufficient Funds.'
+ 
+ /user/{id}/orders:
+
+   get:
+     operationId: R210
+     summary: 'R210: View user previous done orders'
+     description: 'Show the individual user previous done orders. Access: USR'
+     tags:
+       - 'M02: User and Notifications'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the user.'
+
+     responses:
+       '200':
+         description: 'Ok. Show User Orders UI'
+       '401':
+         description: 'Unauthorized. User not logged in.'
+
+
+
+ /user/{id}/delete_account:
+  post:
+    operationId: R211
+    summary: 'R211: Delete User Account'
+    description: 'Delete a user account. Access: OWN'
+    tags:
+      - 'M02: User and Notifications'
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user.'
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+            required:
+              - id
+    responses:
+      '302':
+        description: 'Redirect after deleting user account.'
+        headers:
+          Location:
+            schema:
+              type: string
+            examples:
+              302Success:
+                description: 'Successful account deletion. Redirect to login page.'
+                value: '/login'
+      '403':
+        description: 'Forbidden. User does not have access.'
+      '404':
+        description: 'Not Found. User account not found.'
+
+
+/user/{id}/change_password:
+  post:
+    operationId: R212
+    summary: 'R212: Change User Password'
+    description: 'Change user password. Access: USR, ADM'
+    tags:
+      - 'M02: User and Notifications'
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user.'
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              current_password:
+                type: string
+                description: 'Current password of the user.'
+              new_password:
+                type: string
+                description: 'New password for the user.'
+            required:
+              - id
+              - current_password
+              - new_password
+    responses:
+      '200':
+        description: 'OK. Password changed successfully.'
+      '401':
+        description: 'Unauthorized. Current password is incorrect.'
+      '403':
+        description: 'Forbidden. User does not have access.'
+      '404':
+        description: 'Not Found. User account not found.'
+
+   /user/{id}/notifications:
+  get:
+    operationId: R213
+    summary: 'R213: View User Notifications'
+    description: 'Show the users notifications page. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user.'
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: 'OK. Show User Notifications Page UI.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '403':
+        description: 'Forbidden. User does not have access.'
+
+
+/user/{id}/view_notification/{notificationId}:
+  get:
+    operationId: R214
+    summary: 'R214: View Notification'
+    description: 'View a single notification. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user.'
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: notificationId
+        description: 'ID of the notification to view.'
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: 'OK. Notification details.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '403':
+        description: 'Forbidden. User does not have access.'
+      '404':
+        description: 'Not Found. The specified notification does not exist.'
+
+  post:
+    operationId: R215
+    summary: 'R215: Mark Notification as Read'
+    description: 'Mark a single notification as read. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user.'
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: notificationId
+        description: 'ID of the notification to mark as read.'
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: 'OK. Notification marked as read.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '403':
+        description: 'Forbidden. User does not have access.'
+      '404':
+        description: 'Not Found. The specified notification does not exist.'
+
+    delete:
+    operationId: R216
+    summary: 'R216: Delete Notification'
+    description: 'Delete a single notification. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user.'
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: notificationId
+        description: 'ID of the notification to delete.'
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: 'OK. Notification deleted.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '403':
+        description: 'Forbidden. User does not have access.'
+      '404':
+        description: 'Not Found. The specified notification does not exist.'
+
+
+/user/{id}/notifications_delete:
+  delete:
+    operationId: R217
+    summary: 'R217: Delete All User Notifications'
+    description: 'Delete all notifications for a user. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user.'
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: 'OK. All notifications deleted.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '403':
+        description: 'Forbidden. User does not have access.'
+      '404':
+        description: 'Not Found. No notifications to delete.'
+
+/createOrder/{id}:
+  post:
+    operationId: R218
+    summary: 'R218: Create an order for the user'
+    description: 'Creating an order for the user. Access: USR'
+    tags:
+      - 'M02: User and Notifications'
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: 'ID of the user.'
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              address:
+                type: string
+              country:
+                type: string
+              city:
+                type: string
+              zip_code:
+                type: string
+              total:
+                type: integer
+              order_date:
+                type: string
+                format: date
+              
+            required:
+              - address
+              - country
+              - city
+              - payment_method
+              - total
+              - zip_code
+              - order_date
+    responses:
+      '302':
+        description: 'Order created successfully. Redirect to checkout page.'
+      '401':
+        description: 'Unauthorized. User not logged in.'
+      '404':
+        description: 'Not Found. The user does not exist.'
+
+/createOrder/{id}:
+    post:
+      operationId: R219
+      summary: 'R219: Complete Checkout'
+      description: 'Create a new order for a user. Access: USR'
+      tags:
+        - 'M04: Orders'
+      parameters:
+        - in: path
+          name: id
+          description: 'ID of the user.'
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: id
+          description: 'ID of the user.'
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: integer
+                  description: 'ID of the product to be added to the order.'
+                quantity:
+                  type: integer
+                  description: 'Quantity of the product.'
+              required:
+                - productId
+                - quantity
+      responses:
+        '201':
+          description: 'Order created successfully.'
+        '401':
+          description: 'Unauthorized. User not logged in.'
+        '404':
+          description: 'Not Found. User or product not found.'
+
+#PRODUCTS - M03
+
+   /product/{id}:
+     get:
+     operationId: R301
+     summary: 'R301: View a specific product details'
+     description: 'Show the details of a specific product. Access: USR'
+     tags:
+       - 'M03: Products'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the product.'
+
+     responses:
+       '200':
+         description: 'Ok. Show Product Details UI'
+       '403':
+         description: 'Failed, user not logged in.'
+
+ /product/{id}/add_to_shoppingcart:
+
+    post:
+    operationId: R302
+    summary: 'R302: Add a specific product to the shopping cart'
+    description: 'Adding a specific product to the user shopping cart. Access: USR'
+    tags:
+      - 'M03: Products'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the product.'
+
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+            required:
+              - productId
+              - quantity
+      responses:
+      '201':
+        description: 'Product added to the shopping cart.'
+      '401':
+        description: 'Unauthorized. User not logged in.'
+      '404':
+        description: 'Not Found. The product does not exist.'
+
+ /product/{id}/add_to_wishlist:
+
+    post:
+      operationId: R303
+      summary: 'R303: Add a specific product to the wishlist'
+      description: 'Adding a specific product to the user wishlist. Access: USR'
+      tags:
+        - 'M03: Products'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the product.'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: integer
+              required:
+                - productId
+        responses:
+        '201':
+          description: 'Product added to the wishlist.'
+        '401':
+          description: 'Unauthorized. User not logged in.'
+        '404':
+          description: 'Not Found. The product does not exist.'
+
+ /product/{id}/add_review:
+
+    post:
+     operationId: R304
+     summary: 'R304: Add a review of a product'
+     description: 'Adding a review of a specific product. Access: USR'
+     tags:
+        - 'M03: Products'
+
+    parameters:
+       - in: path
+         name: id
+         schema:
+           type: integer
+         required: true
+    
+     requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: integer
+                reviewText:
+                  type: string
+              required:
+                - productId
+                - reviewText
+
+        responses:
+        '201':
+          description: 'Reviewed successfuly.'
+        '401':
+          description: 'Unauthorized. User not logged in.'
+        '404':
+          description: 'Not Found. The product does not exist.'
+
+ /product/{category}:
+
+     get:
+       operationId: R305
+       summary: 'R305: View products from a certain category'
+       description: 'Show all the products from a certain category. Access: USR'
+       tags:
+         - 'M03: Products'
+    
+      parameters:
+        - in: path
+          name: category
+          schema:
+            type: string
+          required: true
+          description: 'Category of the products.'
+
+     responses:
+       '200':
+         description: 'Ok. Show Products Page UI'
+
+ /product/{category}/{subcategory}:
+
+     get:
+     operationId: R306
+     summary: 'R306: View products from a certain sub-category'
+     description: 'Show all the products from a certain sub-category. Access: USR'
+     tags:
+       - 'M03: Products'
+     
+      parameters:
+        - in: path
+          name: category
+          schema:
+            type: string
+          required: true
+          description: 'Category of the products.'
+        - in: path
+          name: subcategory
+          schema:
+            type: string
+          required: true
+          description: 'Subcategory of the products.'
+
+     responses:
+       '200':
+         description: 'Ok. Show Products Page UI'
+
+ /product/{id}/upvote_review:
+    post:
+      operationId: R307
+      summary: 'R307: Upvote a product review'
+      description: 'Upvoting a review of a specific product. Access: USR'
+      tags:
+        - 'M03: Products'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the product associated with the review to upvote.'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                reviewId:
+                  type: integer
+                userId:
+                  type: integer
+              required:
+                - reviewId
+                - userId
+
+      responses:
+        '201':
+          description: 'Review upvoted successfully.'
+        '401':
+          description: 'Unauthorized. User is not logged in.'
+        '404':
+          description: 'Not Found. The product or review does not exist.'
+
+ /product/{id}/report_review:
+    post:
+      operationId: R308
+      summary: 'R308: Report a product review'
+      description: 'Reporting a review of a specific product. Access: USR'
+      tags:
+        - 'M03: Products'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the product associated with the review to report.'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: date
+                reviewId:
+                  type: integer
+                userId:
+                  type: integer
+                reason:
+                  type: string
+              required:
+                - reviewId
+                - userId
+                - reason
+                - date
+
+      responses:
+        '201':
+          description: 'Review reported successfully.'
+        '401':
+          description: 'Unauthorized. User is not logged in.'
+        '404':
+          description: 'Not Found. The product or review does not exist.'
+
+    /category/{id}:
+  get:
+    operationId: R309
+    summary: 'R309: Retrieve products by category or subcategory'
+    description: 'Retrieve products belonging to a specific category. Access: PUB'
+    tags:
+      - 'M03: Products'
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: 'ID of the category.'
+    responses:
+      '200':
+        description: 'Products retrieved successfully.'
+      '404':
+        description: 'Not Found. The category does not exist.'
+
+
+/product/{id}/remove_from_shoppingcart:
+  post:
+    operationId: R310
+    summary: 'R310: Remove a specific product from the shopping cart'
+    description: 'Removing a specific product from the user shopping cart. Access: USR'
+    tags:
+      - 'M03: Products'
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: 'ID of the product.'
+    responses:
+      '204':
+        description: 'Product removed from the shopping cart.'
+      '401':
+        description: 'Unauthorized. User not logged in.'
+      '404':
+        description: 'Not Found. The product does not exist.'
+
+
+#Search - M04
+
+ /homepage/search:
+    get:
+      operationId: R401
+      summary: 'R401: Search page'
+      description: 'Show Search Page. Access USR, ADM, VST'
+      tags:
+        - 'M04: Search'
+
+      responses:
+        '200':
+          description: 'OK. Show the Search page.'
+
+ /search/{category}:
+    get:
+      operationId: R402
+      summary: 'R402: Search Page with filter'
+      description: 'Show the Search page for a specific Category. Access: PUB'
+      tags:
+        - 'M04: Search'
+      parameters:
+        - in: query
+          name: query_search
+          description: 'Search query.'
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: category
+          description: 'Product Category.'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'OK. Show search results UI'
+
+ /search/{category}/{subcategory}:
+    get:
+      operationId: R403
+      summary: 'R403: Search products by Category and Subcategory'
+      description: 'Show products by a specific Category and Subcategory. Access: PUB'
+      tags:
+        - 'M04: Search'
+      parameters:
+        - in: path
+          name: category
+          description: 'Product Category.'
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: subcategory
+          description: 'Product Subcategory.'
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: query_search
+          description: 'Search query.'
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'OK. Show search results UI'
+ 
+ /search-products:
+  get:
+    operationId: R404
+    summary: 'R404: Search Products API'
+    description: 'Search products and return results as JSON. Access: PUB'
+    tags:
+      - 'M04: Search'
+    parameters:
+      - in: query
+        name: query_search
+        description: 'Search query.'
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: category
+        description: 'Product Category.'
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: 'Success'
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  productName:
+                    type: string
+                  description:
+                    type: string
+                  price:
+                    type: number
+                  brand:
+                    type: string
+                  category:
+                    type: string
+                  tsvectors:
+                    type: string
+      '400':
+        description: 'Bad Request'
+      '404':
+        description: 'Not Found' 
+
+    /sort-products:
+  post:
+    operationId: R405
+    summary: 'R405: Sort products'
+    description: 'Sort products based on specified criteria. Access: PUB'
+    tags:
+      - 'M04: Search'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              sort_criteria:
+                type: string
+                enum: ['name', 'price', 'rating']
+              sort_order:
+                type: string
+                enum: ['asc', 'desc']
+    responses:
+      '200':
+        description: 'Products sorted successfully.'
+      '400':
+        description: 'Bad Request. Invalid sort criteria or sort order.'
+
+  
+
+#Static Pages - M05
+
+ /homepage:
+
+   get:
+     operationId: R501
+     summary: 'R501: View homepage'
+     description: 'Show the homepage. Access: USR, ADM, VST'
+     tags:
+       - 'M05: Static Pages'
+
+     responses:
+       '200':
+         description: 'Ok. Show Homepage UI'
+      
+ /about:
+
+   get:
+     operationId: R502
+     summary: 'R502: View about page'
+     description: 'Show the about page. Access: USR, ADM, VST'
+     tags:
+       - 'M05: Static Pages'
+
+     responses:
+       '200':
+         description: 'Ok. Show About Page'
+  
+ /faq:
+
+   get:
+     operationId: R503
+     summary: 'R503: View FAQ page'
+     description: 'Show the FAQ page. Access: USR, ADM, VST'
+     tags:
+       - 'M05: Static Pages'
+
+     responses:
+       '200':
+         description: 'Ok. Show FAQ Page'
+
+ /main_features:
+
+   get:
+     operationId: R504
+     summary: 'R504: View main features page'
+     description: 'Show the main features page. Access: USR, ADM, VST'
+     tags:
+       - 'M05: Static Pages'
+
+     responses:
+       '200':
+         description: 'Ok. Show Main Features Page'
+
+#Administration - M06
+
+/admin/add_new_product:
+  post:
+    operationId: R601
+    summary: 'R601: Add a New Product'
+    description: 'Add a new product to the system. Access: ADM'
+    tags:
+      - 'M06: Administration'
+    requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              productName:
+                type: string
+                description: 'Name of the product.'
+              description:
+                type: string
+                description: 'Product description.'
+              price:
+                type: number
+                description: 'Price of the product.'
+              stock:
+                type: integer
+                description: 'Stock quantity available.'
+              brandId:
+                type: integer
+                description: 'ID of the product brand.'
+              discountId:
+                type: integer
+                description: 'ID of the discount applied (optional).'
+              categories:
+                type: array
+                items:
+                  type: integer
+                description: 'Array of category IDs this product belongs to.'
+            required:
+              - productName
+              - price
+              - stock
+              - brandId
+              - categories
+    responses:
+      '201':
+        description: 'Product added successfully.'
+      '400':
+        description: 'Bad Request. Invalid product details.'
+      '401':
+        description: 'Unauthorized. User is not an admin.'
+
+/admin/delete_product/{id}:
+  delete:
+    operationId: R602
+    summary: 'R602: Delete a Product'
+    description: 'Delete a product by ID. Access: ADM'
+    tags:
+      - 'M06: Administration'
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the product to delete.'
+        required: true
+        schema:
+          type: integer
+    responses:
+      '204':
+        description: 'Product deleted successfully.'
+      '404':
+        description: 'Not Found. The product does not exist.'
+      '401':
+        description: 'Unauthorized. User is not an admin.'
+
+
+ /user/admin:
+
+   get:
+     operationId: R603
+     summary: 'R603: View administration page'
+     description: 'Show the administration page. Access: ADM'
+     tags:
+       - 'M06: Administration'
+
+     responses:
+       '200':
+         description: 'Ok. Show Administration Page UI'
+       '403':
+         description: 'Permission denied.'
+
+/admin/product/{id}/update_product:
+  post:
+    operationId: R604
+    summary: 'R604: Update Product'
+    description: 'Update a product. Access: ADM'
+    tags:
+      - 'M06: Administration'
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the product to update.'
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      description: 'Update Product Form'
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              productName:
+                type: string
+                description: 'New name of the product.'
+              description:
+                type: string
+                description: 'New product description.'
+              extraInformation:
+                type: string
+                description: 'New extra information for the product.'
+              price:
+                type: number
+                description: 'New price of the product.'
+              stock:
+                type: integer
+                description: 'New stock quantity.'
+              brandId:
+                type: integer
+                description: 'New brand ID.'
+              discountId:
+                type: integer
+                description: 'New discount ID for the product.'
+            required:
+              - productName
+    responses:
+      '200':
+        description: 'OK. Product updated successfully.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '404':
+        description: 'Not Found. The product does not exist.'
+
+
+/admin/user/{id}/manage_user:
+  post:
+    operationId: R605
+    summary: 'R605: Block/Unblock User'
+    description: 'Block or unblock a user. Access: ADM'
+    tags:
+      - 'M06: Administration'
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the user to block or unblock.'
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      description: 'Block/Unblock User Form'
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                description: 'Action to perform, "block" or "unblock".'
+              blockDate:
+                type: string
+                format: date
+                description: 'Date of the block action.'
+            required:
+              - action
+    responses:
+      '200':
+        description: 'OK. User blocked or unblocked successfully.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '404':
+        description: 'Not Found. The user does not exist.'
+
+
+/admin/review/{id}/delete_review:
+  delete:
+    operationId: R606
+    summary: 'R606: Delete Product Review'
+    description: 'Delete a product review. Access: ADM'
+    tags:
+      - 'M06: Administration'
+    parameters:
+      - in: path
+        name: id
+        description: 'ID of the review to delete.'
+        required: true
+        schema:
+          type: integer
+    responses:
+      '204':
+        description: 'No Content. Review deleted successfully.'
+      '401':
+        description: 'Unauthorized. User is not logged in.'
+      '404':
+        description: 'Not Found. The review does not exist.'
+      '403':
+        description: 'Forbidden. User is not an admin.'
+
+
+ /admin/reported_reviews:
+
+   get:
+     operationId: R607
+     summary: 'R607: View reported reviews page'
+     description: 'Show the reported reviews. Access: ADM'
+     tags:
+       - 'M06: Administration'
+
+     responses:
+       '200':
+         description: 'Ok. Show reported reviews'
+
+ 

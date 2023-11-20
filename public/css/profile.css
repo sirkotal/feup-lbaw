@@ -1,0 +1,138 @@
+:root {
+    --green: #00754D;
+    --grey: #D9D9D9;
+}
+
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+}
+
+div#Profile{
+    margin: 5rem;
+    display: grid;
+    grid-template-columns: [start] 1fr [middle] 1.5fr [starthistory] 4fr [end];
+    grid-template-rows: [start] auto [middle] auto [end];
+    column-gap: 2rem;
+    row-gap: 2rem;
+}
+
+div#Profile img{
+    grid-column: start/middle;
+    grid-row: start/middle;
+}
+
+div.Data{
+    align-self: center;
+    grid-column: middle/starthistory;
+    grid-row: start/middle;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+div.Data div{
+    color: black;
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+}
+
+div.Data h2::after{   
+    content: ':';
+}
+
+a.edit_profile{
+    justify-self: start;
+    grid-column: start/starthistory;
+    grid-row: middle/end;
+    background-color: var(--green);
+    color: white;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    border-radius: 10px;
+    border: none;
+}
+
+#editPhoto{
+    margin-top: 1rem;
+    display: flex;
+}
+
+  
+#history{
+    grid-column: starthistory/end;
+    grid-row: start/middle;
+    align-self: start;
+    width: 95%;
+    justify-self: end;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0.1rem solid var(--green);
+}
+
+#history th{
+    background-color: var(--green);
+    color: white;
+    border-left: 0.1rem solid var(--green);
+    padding: 1rem 2rem;
+}
+
+#history td, #history th{
+    text-align: center;
+    width: 15%;
+    outline: none;
+}
+
+#history tr:nth-child(2n){
+    background-color: white;
+}
+
+#history .showProducts{
+    width: 100%;
+    padding: 1rem 2rem;
+    border: none;
+}
+
+#history .showProducts.hide{
+    display: none;
+}
+
+#history .showProducts:hover{
+    background-color: var(--green);
+}
+
+.list-products.show{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 2rem;
+}
+
+.list-products{
+    display: none;
+}
+
+.list-products a{
+    color: black;
+    text-decoration: none;
+}
+
+.list-products button{
+    border: none;
+    position: absolute;
+    margin: 0.1rem;
+    top: 0rem;
+    right: 0rem;
+}
+
+.list-products button:hover{
+    background-color: #00754D;
+    color: white;
+}
+
+#pfp{
+    max-width: 20em;
+}

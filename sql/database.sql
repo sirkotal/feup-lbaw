@@ -37,8 +37,10 @@ CREATE TABLE users (
    id SERIAL PRIMARY KEY,
    dateofbirth DATE,
    username VARCHAR(256) UNIQUE NOT NULL,
-   userPath VARCHAR(256), 
+   photo VARCHAR(256), 
    userPassword VARCHAR(256) NOT NULL,
+   phoneNumber VARCHAR(256),
+   address VARCHAR(256),
    email VARCHAR(256) UNIQUE NOT NULL,
    isDeleted BOOL DEFAULT false NOT NULL
 );

@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('title', 'Cards')
+@include('headers.header')
+@section('header')
+    @yield('header')
+@endsection
 
 @section('content')
 

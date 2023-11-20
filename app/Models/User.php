@@ -2,58 +2,74 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-
-// Added to define Eloquent relationships.
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use Notifiable;
 
-    // Don't add create and update timestamps in database.
-    public $timestamps  = false;
+    protected $table = 'users';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    public $timestamps = false;
+
     protected $fillable = [
-        'name',
+        'date_of_birth',
+        'username',
+        'user_path',
+        'password',
         'email',
-        'password',
+        'phone_number',
+        'is_deleted',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password'
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-
-    /**
-     * Get the cards for a user.
-     */
-    public function cards(): HasMany
+    public function orders()
     {
-        return $this->hasMany(Card::class);
+        return $this->hasMany(Order::class, 'user_id');
+    }
+
+    public function wishlist()
+    {
+        return $this->belongsToMany(User::class, 'wishlist', 'product_id', 'user_id');
+    }
+
+    public function shoppingCart()
+    {
+        return $this->belongsToMany(Product::class, 'shoppingcart', 'user_id', 'product_id')
+            ->withPivot('quantity');
+    }
+
+    public function reportedReviews()
+    {
+        return $this->belongsToMany(Review::class, 'report', 'user_id', 'review_id')
+                    ->withPivot('date', 'reason');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'user_id');
+    }
+
+    public function upvotedReviews()
+    {
+        return $this->belongsToMany(Review::class, 'upvote', 'user_id', 'review_id');
+    }
+
+    public function blockActionsHistory()
+    {
+        return $this->hasMany(BlockAction::class, 'user_id');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
+    public function getUserPath()
+    {
+        return $this->userPath;
     }
 }

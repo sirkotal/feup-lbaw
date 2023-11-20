@@ -1,37 +1,44 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
 @section('content')
-<form method="POST" action="{{ route('login') }}">
-    {{ csrf_field() }}
+<div class="login-page">
+    <div class="left-login">
+        <a href="{{ route('mainPage') }}"><img src="{{ asset('cap.png') }}" alt="yummy"></a>
+        <h1>Cappuccino</h1>
+    </div>
 
-    <label for="email">E-mail</label>
-    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>
-    @if ($errors->has('email'))
-        <span class="error">
-          {{ $errors->first('email') }}
-        </span>
-    @endif
+    <div class="right-login">
+        <h1>Log In</h1>
+        <form method="POST" action="{{ route('login') }}">
+            {{ csrf_field() }}
 
-    <label for="password" >Password</label>
-    <input id="password" type="password" name="password" required>
-    @if ($errors->has('password'))
-        <span class="error">
-            {{ $errors->first('password') }}
-        </span>
-    @endif
+            <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Email" required autofocus>
+            @if ($errors->has('email'))
+                <span class="error">
+                {{ $errors->first('email') }}
+                </span>
+            @endif
 
-    <label>
-        <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> Remember Me
-    </label>
 
-    <button type="submit">
-        Login
-    </button>
-    <a class="button button-outline" href="{{ route('register') }}">Register</a>
-    @if (session('success'))
-        <p class="success">
-            {{ session('success') }}
-        </p>
-    @endif
-</form>
+            <input id="password" type="password" name="password" placeholder="Password" required>
+            @if ($errors->has('password'))
+                <span class="error">
+                    {{ $errors->first('password') }}
+                </span>
+            @endif
+
+            <div class="button-container">
+                <button type="submit" id="login-button">
+                    Login
+                </button> 
+            </div>
+            <div class="button-container"><a class="button button-outline" href="{{ route('register') }}">Sign Up</a></div>
+            @if (session('success'))
+                <p class="success">
+                    {{ session('success') }}
+                </p>
+            @endif
+        </form>
+    </div>
+</div>
 @endsection

@@ -1,0 +1,91 @@
+:root {
+    --green: #00754D;
+    --grey: #D9D9D9;
+}
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+}
+
+div#forms{
+    display: flex;
+    justify-content: center;
+    gap:10rem;
+}
+
+form#editProfile {
+    width: 25%;
+    border: 0.2rem solid #00754D;
+    border-radius: 10px;
+    margin: 2.5rem 0;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+label.editProfile {
+    color: root(--green);
+    font-size: 1.5rem;
+}
+
+div.editComponent{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+div.editComponent input{
+    border: 0.2rem solid #00754D;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    min-width: 17em;
+}
+
+div.editComponent input:focus{
+    outline: none;
+}
+
+#editProfile button{
+    width: 50%;
+    background-color: var(--green);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    border: none;
+}
+
+form#editPassword {
+    align-self: start;
+    width: 25%;
+    border: 0.2rem solid #00754D;
+    border-radius: 10px;
+    margin: 2.5rem 0;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+#editPassword button{
+    width: 50%;
+    background-color: var(--green);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    border: none;
+}
+
+input#password-confirm{
+    border: 0.2rem solid #00754D;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    min-width: 17em;
+}

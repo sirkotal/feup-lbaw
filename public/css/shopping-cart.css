@@ -1,0 +1,147 @@
+.cart-content {
+    display: flex;
+    justify-content: center;
+}
+
+.cart {
+    text-align:center;
+    font-size: 3em;
+}
+.cart-items {
+    max-width: 50em;
+    flex: 6;
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    gap: 10px;
+}
+
+.item-ticket{
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    width: 100%;
+}
+
+.item-details{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.cart-img {
+    border-radius: 4px;
+    max-width: 10em;
+}
+
+.cart-checkout {
+    flex: 2;
+    height: 20em;
+    max-width: 15em;
+    display: flex;
+    flex-direction:column;
+    gap: 20px;
+    background-color: white;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    margin: 10px;
+    margin-left: 0;
+    padding: 2em;
+}
+
+
+
+.cart-checkout button {
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    align-self: center;
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+}
+
+.cart-checkout a {
+    background-color: var(--primary-color);
+    color: white;
+    align-self: center;
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+}
+
+.cart-checkout p:first-child {
+    font-weight: bold;
+    font-size: 2em;
+}
+
+.cart-checkout p:last-of-type {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-weight: bold;
+    border-top: 1px solid #E5E5E5;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.cart-button {
+    display: block;
+    align-self: center;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    border: none;
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+.item-name {
+    font-weight: bold;
+    font-size: 2em;
+}
+
+.buttons{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.item-price-total{
+    flex: 2;
+    font-weight: bold;
+    font-size: 2em;
+}
+
+.unable{
+    display: block;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #867a7a;
+    border: none;
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    color: black;
+}
+
+.delete_product {
+    flex: 2;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #907a7a;
+    border: none;
+    font-size: 1.2em;
+    width: 2em;
+    height: 2em;
+    padding: 5px;
+    color: white;
+    cursor: pointer;
+}

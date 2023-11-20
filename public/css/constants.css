@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Imperial+Script&family=Mulish&family=Ruda:wght@400;600;700;800&display=swap');
+
+
+:root {
+    --primary-color: #00754D;
+    --secundary-color: #D9D9D9;
+    --third-color: #48B03B;
+    --closed-color: #BF0000;
+    --dark-blue: #1C2331;
+    --background-color: #252D3D;
+    --text-color: #FFF;
+    --logo-color: #0077BE;
+    --dark-blue-highlight: #001AFF;
+
+    
+    --text-font: 'Roboto', sans-serif;
+    --hightlight-font: 'DM Serif Display', serif;
+}
+
+@media screen and (max-width: 970px) {
+    :root {
+        font-size: 8px;
+    }
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+footer{
+    margin-top: auto;
+}

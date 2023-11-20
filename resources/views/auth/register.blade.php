@@ -1,39 +1,45 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
 @section('content')
-<form method="POST" action="{{ route('register') }}">
-    {{ csrf_field() }}
+<div class="register-page">
+    <div class="left-register">
+        <img src="{{ asset('cap.png') }}" alt="yummy">
+        <h1>Cappuccino</h1>
+    </div>
 
-    <label for="name">Name</label>
-    <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus>
-    @if ($errors->has('name'))
-      <span class="error">
-          {{ $errors->first('name') }}
-      </span>
-    @endif
+    <div class="right-register">
+        <h1>Register</h1>
+        <form method="POST" action="{{ route('register') }}">
+            {{ csrf_field() }}
 
-    <label for="email">E-Mail Address</label>
-    <input id="email" type="email" name="email" value="{{ old('email') }}" required>
-    @if ($errors->has('email'))
-      <span class="error">
-          {{ $errors->first('email') }}
-      </span>
-    @endif
+            <input id="username" type="username" name="username" value="{{ old('username') }}" placeholder="Username" required autofocus>
+            @if ($errors->has('username'))
+            <span class="error">
+                {{ $errors->first('username') }}
+            </span>
+            @endif
 
-    <label for="password">Password</label>
-    <input id="password" type="password" name="password" required>
-    @if ($errors->has('password'))
-      <span class="error">
-          {{ $errors->first('password') }}
-      </span>
-    @endif
+            <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Email" required>
+            @if ($errors->has('email'))
+            <span class="error">
+                {{ $errors->first('email') }}
+            </span>
+            @endif
 
-    <label for="password-confirm">Confirm Password</label>
-    <input id="password-confirm" type="password" name="password_confirmation" required>
+            <input id="password" type="password" name="password" placeholder="Password" required>
+            @if ($errors->has('password'))
+            <span class="error">
+                {{ $errors->first('password') }}
+            </span>
+            @endif
 
-    <button type="submit">
-      Register
-    </button>
-    <a class="button button-outline" href="{{ route('login') }}">Login</a>
-</form>
+            <input id="password-confirm" type="password" name="password_confirmation" placeholder="Confirm Password" required>
+
+            <div class="button-container"> <button type="submit" id="register-button">
+            Register
+            </button></div>
+            <div class="button-container"><a class="button button-outline" href="{{ route('login') }}">Login</a></div>
+        </form>
+    </div>
+</div>
 @endsection
