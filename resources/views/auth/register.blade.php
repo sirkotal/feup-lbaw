@@ -1,9 +1,11 @@
 @extends('layouts.auth')
 
+@section('title', 'Register')
+
 @section('content')
 <div class="register-page">
     <div class="left-register">
-        <img src="{{ asset('cap.png') }}" alt="yummy">
+        <a href="{{ route('mainPage') }}"><img src="{{ asset('cap.png') }}" alt="yummy"></a>
         <h1>Cappuccino</h1>
     </div>
 

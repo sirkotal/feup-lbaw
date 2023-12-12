@@ -73,9 +73,8 @@
 }
 
 .product-image-mainpage {
-    max-width: 20em;
-    height: auto;
-    margin-bottom: 10px;
+    max-width: 10em;
+    height: 10em;
 }
 
 .product-name-mainpage {
@@ -124,7 +123,7 @@
     cursor: pointer;
 }
 
-.product-cart-mainpage, .product-wishlist-mainpage {
+.product-cart-mainpage {
     background-color: var(--primary-color);
     color: var(--secundary-color);
     font-size: 1em; 
@@ -134,15 +133,9 @@
     cursor: pointer;
 }
 
-.product-cart-mainpage:hover, .product-wishlist-mainpage:hover, .quantity_buttons button:hover {
+.product-cart-mainpage:hover, .quantity_buttons button:hover {
     background-color: var(--secundary-color);
     color: var(--primary-color);
-}
-
-@media (max-width: 768px) {
-    .featured-products {
-        flex-direction: column; /* Change to a column layout on smaller screens */
-    }
 }
 
 .product-out-mainpage {
@@ -155,6 +148,96 @@
 }
 
 .no-items{
-    font-size: 2em;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    font-size: 1.2em;
     text-align: center;
+    margin-top: 15%;
+    height: 500px;
+}
+
+.checked {
+    color: orange;
+}
+
+/* Custom styles for Bootstrap pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    border-radius: 5px;
+}
+
+.pagination .page-item {
+    display: inline-block;
+}
+
+.pagination span {
+    display: block;
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    background-color: #867a7a;
+    color: var(--primary-color);
+    border: 1px solid #867a7a;
+}
+
+.pagination .page-link {
+    line-height: inherit;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    color: var(--primary-color);
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    z-index: 1;
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.pagination .page-link:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.links{
+    margin: 30px;
+}
+
+.title {
+    text-align:center;
+    font-size: 3em;
+    color: black;
+}
+
+.product-removewishlist-mainpage, .product-wishlist-mainpage{
+    background-color: white;
+    color: var(--primary-color);
+    font-size: 1em; 
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.product-removewishlist-mainpage:hover, .product-wishlist-mainpage:hover {
+    background-color: white;
+    color: var(--secundary-color);
+}
+
+.go-search{
+    align-self: center;
+    max-width: 200px;
+    color: white;
+    background-color: var(--primary-color);
+    font-size: 1em; 
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }

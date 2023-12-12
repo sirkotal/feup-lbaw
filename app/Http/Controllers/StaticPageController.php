@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Brand;
+use App\Models\User;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class StaticPageController extends Controller
@@ -26,6 +29,25 @@ class StaticPageController extends Controller
         return view('pages.about');
     }
 
+    public function showFeaturesPage()
+    {
+        $productCount = Product::count();
+        $brandCount = Brand::count();
+        $userCount = User::count();
+        $orderCount = Order::count();
+
+        return view('pages.features', ['productCount' => $productCount, 'brandCount' => $brandCount, 'userCount' => $userCount, 'orderCount' => $orderCount]);
+    }
+
+    public function showSearchedProductsPage()
+    {
+        /* temporary */
+        $products = Product::all();
+        $mainCategories = Category::whereNull('parent_category_id')->get();
+
+        return view('pages.search-products',['products' => $products]);
+    }
+
     public function showCheckoutPage()
     {
         $this->authorize('showCheckout', Order::class);
@@ -43,13 +65,5 @@ class StaticPageController extends Controller
         return view('pages.checkout',compact('cartItems', 'totalCost', 'numberOfItems', 'user', 'lastOrder'));
     }
 
-    public function showSearchedProductsPage()
-    {
-        /* temporary */
-        $products = Product::all();
-        $mainCategories = Category::whereNull('parent_category_id')->get();
-
-        return view('pages.search-products',['products' => $products]);
-    }
 
 }

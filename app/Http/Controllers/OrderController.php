@@ -18,13 +18,14 @@ class OrderController extends Controller
         //
     }
 
-    public function createOrder($id, Request $request)
+    public function createOrder(Request $request)
     {
         try {
             $this->authorize('createOrder', Order::class);
+            \Stripe\Stripe::setApiKey(config('stripe.sk'));
 
             DB::beginTransaction();
-    
+
             $user = auth()->user();
     
             if ($user->shoppingCart->isEmpty()) {
@@ -36,7 +37,7 @@ class OrderController extends Controller
             $order = new Order([
                 'order_date' => now(),
                 'item_quantity' => 0,
-                'order_status' => 'Shipping',
+                'order_status' => 'Waiting for payment',
                 'total' => 0,
                 'address' => $formData['address'],
                 'country' => $formData['country'],
@@ -72,18 +73,49 @@ class OrderController extends Controller
             }
     
             $order->save();
-    
+
+            /* PAYMENT TRANSACTION TO BE CHANGED */
+
             $paymentTransaction = new paymentTransaction([
-                'method' => $formData['payment_method'],
+                'method' => 'Credit Card',
                 'payment_status' => 'Approved',
                 'order_id' => $order->id,
             ]);
     
             $paymentTransaction->save();
-    
+
+            $lineItems = [];
+
+            foreach ($shoppingCartItems as $cartItem) {
+                $lineItems[] = [
+                    'price_data' => [
+                        'currency' => 'eur',
+                        'product_data' => [
+                            'name' => $cartItem->product_name,
+                        ],
+                        'unit_amount' => $cartItem->price * 100,
+                    ],
+                    'quantity' => $cartItem->pivot->quantity,
+                ];
+            }
+
             DB::commit();
+
+            $paymentIntent = \Stripe\Checkout\Session::create([
+                'line_items' => $lineItems,
+                'mode' => 'payment',
+                'success_url' => route('stripe.success', ['order_id' => $order->id]),
+                'cancel_url' => route('stripe.cancel', ['order_id' => $order->id]),
+                'locale' => 'pt',
+            ]);
+
+            return redirect()->away($paymentIntent->url);
+
+            /*if ($paymentIntent->status !== 'succeeded') {
+                throw new \Exception('Stripe payment failed');
+            }
     
-            return redirect()->route('user')->with('success', 'Order placed successfully!');
+            return redirect()->route('user')->with('success', 'Order placed successfully!');*/
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors(['transaction-error' => 'Transaction failed: ' . $e->getMessage()]);
@@ -107,12 +139,21 @@ class OrderController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Order $order)
+    public function edit(Request $request)
     {
-        //
+        $this->authorize('editProduct', User::class);
+
+        $request->validate([
+            'order_status' => 'required',
+        ]);
+
+        $order = Order::findOrFail($request->input('id'));
+
+        $order->update([
+            'order_status' => $request->input('order_status'),
+        ]);
+
+        return response()->json(['message' => 'ok']);
     }
 
     /**

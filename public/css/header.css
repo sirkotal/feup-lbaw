@@ -1,3 +1,31 @@
+a{
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: none;
+  color:inherit;
+}
+
+body > main > header > div.title-logo > h1 > a:hover{
+  color: #D9D9D9;
+}
+
+body > main > header > div.title-logo > h1 > a{
+  font-size: 2rem;
+  align-self: center;
+}
+
+body > main > header > div.title-logo > h1{
+  font-size: 2rem;
+  align-self: center;
+  justify-content: center;
+}
+
+body > main > nav > ul > li > a:hover{
+  color: #D9D9D9;
+}
+
 body {
     font-family:sans-serif;
     background-color: #D9D9D9;
@@ -95,7 +123,7 @@ main > header h1 {
   object-fit: cover;
 }
 
-ul {
+.categories {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -103,11 +131,11 @@ ul {
   background-color: #333;
 }
 
-li {
+.categories li {
   float: left;
 }
 
-li a {
+.categories a {
   display: block;
   color: white;
   text-align: center;
@@ -115,17 +143,17 @@ li a {
   text-decoration: none;
 }
 
-li a:hover {
+li a:hover, .active{
   background-color: #111;
 }
 
 footer {
-  padding-top: 0px;
-  padding: 5px;
-  background-color: #867A7A;
-  display:flex;
-  justify-content: space-between;
-  align-items: center;
+  background-color: #333;
+  color: #D9D9D9;
+}
+
+footer h5{
+  color: #fff;
 }
 
 .static-pages {
@@ -137,15 +165,16 @@ footer {
   color: black;
   text-decoration: none;
 }
-.payment p{
-  display: flex;
-  flex-direction: column;
-}
+
 .payment-methods {
   display: flex;
   justify-content: space-evenly;
-  padding: auto;
-  padding-bottom: 10px;
+  gap: 10px;
+  padding: 10px;
+  background-color: #D9D9D9;
+  border-radius: 10px;
+  margin: 0 auto;
+  width: min-content;
 }
 
 .payment-methods img {
@@ -193,3 +222,8 @@ li:hover .dropdown-content {
   display: block;
 }
 
+@media (max-width: 767px) {
+  .footer-row {
+    flex-wrap: nowrap;
+  }
+}

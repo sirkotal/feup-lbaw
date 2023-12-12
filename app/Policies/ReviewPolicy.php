@@ -6,6 +6,8 @@ use App\Models\Review;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
+use Illuminate\Support\Facades\Auth;
+
 class ReviewPolicy
 {
     /**
@@ -44,8 +46,8 @@ class ReviewPolicy
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Review $review): bool
-    {
-        //
+    {   
+        return Auth::user()->id == $user->id && ($user->id == $review->user_id || Auth::user()->id == 1);
     }
 
     /**

@@ -1,0 +1,82 @@
+.dot {
+    position: relative;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    top: -8px;
+    left: 25px;
+  }
+  
+  .notificationspanel {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top:5.8%;
+    left: 76%;
+    width: 18%;
+    max-height: 45%;
+    background-color: var(--secundary-color);
+    border: 1px solid black;
+    overflow-y: auto; 
+    border-radius: 5px;
+    background-color: white;
+    z-index: 2; 
+  }
+  
+  .notification {
+    cursor: pointer;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    flex-wrap: wrap;
+    background-color: white;
+    padding: 10px 0;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-bottom: 1px solid var(--primary-color);
+  }
+  
+  .notification:last-child {
+    border-bottom: none;
+  }
+
+.notification-image {
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+}
+
+.notification-content{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    flex: 1;
+}
+
+.notification-message{
+  text-align: center;
+  font-size: 1em;
+}
+
+.notification-product-price{
+    font-size: 0.8em;
+    text-decoration: line-through;
+    color: red;
+}
+
+.product-name {
+  font-weight: bold;
+}
+
+.notification button{ 
+  margin: 0;
+  padding: 5px 9px;
+  justify-content: end;
+  border: none;
+  border-radius: 50%;
+  background-color: #333333;
+  cursor: pointer;
+}

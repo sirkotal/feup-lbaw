@@ -46,7 +46,6 @@
     max-width: 15em;
     display: flex;
     flex-direction:column;
-    gap: 20px;
     background-color: white;
     border: 1px solid var(--primary-color);
     border-radius: 5px;
@@ -133,7 +132,6 @@
 }
 
 .delete_product {
-    flex: 2;
     text-align: center;
     border-radius: 50%;
     background-color: #907a7a;

@@ -14,7 +14,7 @@ class Wishlist extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'userId',
-        'productId',
+        'user_id',
+        'product_id',
     ];
 }

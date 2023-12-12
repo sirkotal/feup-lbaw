@@ -7,8 +7,8 @@
 
         <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>{{ config('app.name', 'Laravel') }}</title>
-        <link rel="icon" href="{{ asset('icon.png') }}" type="image/x-icon">
+        <title>@yield('title')</title>
+        <link rel="icon" href="{{ asset('images/icon.png') }}" type="image/x-icon">
         <!-- Styles -->
         <link href="{{ url('css/login.css') }}" rel="stylesheet">
         <link href="{{ url('css/register.css') }}" rel="stylesheet">

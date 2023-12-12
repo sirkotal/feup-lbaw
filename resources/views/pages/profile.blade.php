@@ -1,79 +1,71 @@
 @extends('layouts.app')
 
+@section('scripts')
+    <script type="text/javascript" src="{{ URL::asset('js/profile.js') }}" defer></script>
+@endsection
+
+@section('title', 'Profile')
+
 @include('headers.simple-header')
 @section('header')
     @yield('header')
 @endsection
 
 @section('content')
-<div id='Profile'>
-    <div id="Photo">
-        <img id="pfp" src="{{ asset('storage/images/' . $user->user_path . '.png') }}" alt="User image">
-        <form id='editPhoto' method="POST" enctype="multipart/form-data" action="{{ route('edit_photo') }}">
-                {{ csrf_field() }}
-                <input id="photo" type="file" name="photo" accept="image/png, image/jpg, image/gif, image/jpeg" required>
-                @if ($errors->has('photo'))
-                    <span class="error">
-                        {{ $errors->first('photo') }}
-                    </span>
-                @endif
-                <button type="submit">
-                    Save
-                </button>
-        </form>
-    </div>
-    <div class='Data'>
-        <div id='Username'>
-            <h2>Username</h2>
-            <p>{{$user->username}}</p>
+<div class="container mt-5">
+    <div class="row">
+    <div class="col-md-8">
+            <table class="table" id='history'>
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Payment Method</th>
+                        <th scope="col">Products</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($orders as $order)
+                        <tr>
+                            <td>{{ $order[0]->order_date }}</td>
+                            <td>{{ $order[0]->order_status }}</td>
+                            <td>{{ $order[0]->total }}€</td>
+                            <td>{{ $order[0]->address }}</td>
+                            <td>{{ $order[0]->paymentTransactions->sortDesc()->first()->method }}</td>
+                            <td><div class="products">
+                                    <button class='showProducts'>details</button>
+                                    <div class="list-products">
+                                        @foreach($order[1] as $product)
+                                            <a href="{{ route('showProductDetails', ['id' => $product->id]) }}">{{$product->product_name}} - {{$product->pivot->quantity}}</a>
+                                        @endforeach
+                                        <button>X</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
-        <div id='Email'>
-            <h2>Email</h2>
-            <p>{{$user->email}}</p>
-        </div>
-        <div id='Birthday'>
-            <h2>Birthday</h1>
-            <p>{{$user->date_of_birth}}</p>
-        </div>
-        <div id='Number'>
-            <h2>Phone Number</h1>
-            <p>{{$user->phone_number}}</p>
-        </div>
-    </div>
-    <table id='history'>
-        <tr>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Total</th>
-            <th>Address</th>
-            <th>Payment Method</th>
-            <th>Products</th>
-        </tr>
-        @foreach($orders as $order)
-        <tr>
-            <td>{{$order[0]->order_date}}</td>
-            <td>{{$order[0]->order_status}}</td>
-            <td>{{$order[0]->total}}€</td>
-            <td>{{$order[0]->address}}</td>
-            <td>{{$order[0]->paymentTransactions->sortDesc()->first()->method}}</td>
-            <td><div class="products">
-                    <button class='showProducts'>details</button>
-                    <div class="list-products">
-                        @foreach($order[1] as $product)
-                            <a href="{{ route('showProductDetails', ['id' => $product->id]) }}">{{$product->product_name}} - {{$product->pivot->quantity}}</a>
-                        @endforeach
-                        <button>X</button>
-                    </div>
+        <div class="col-md-4">
+            <div class="card">
+                <img class="card-img-top" src="{{ asset('storage/images/' . $user->user_path . '.png') }}" alt="User image">
+                <div class="card-body">
+                    <h5 id="Username" class="card-title">{{ $user->username }}</h5>
+                    <p class="card-text"><i class="fa fa-envelope" aria-hidden="true"></i>  {{ $user->email }}</p>
+                    <p class="card-text"><i class="fa fa-calendar" aria-hidden="true"></i>  {{ $user->date_of_birth }}</p>
+                    <p class="card-text"><i class="fa fa-phone" aria-hidden="true"></i>  {{ $user->phone_number }}</p>
+                    <a href="{{ route('show/edit_profile') }}" class="btn btn-success">Edit Profile</a>
+                    @if(Auth::user()->id == 1)
+                        <a href="{{ route('admin_users') }}" class="btn btn-primary">Admin</a>
+                    @else
+                        <button class="delete btn btn-danger">Delete Profile</button>
+                    @endif
                 </div>
-            </td>
-        </tr>
-        @endforeach
-    </table>
-    <div>
-    <a class="edit_profile" href="{{ route('show/edit_profile') }}">Edit Profile</a>
-    @if(Auth::user()->id == 1)
-    <a class="edit_profile" href="{{ route('admin_page') }}">Admin</a>
-    @endif
+            </div>
+        </div>
     </div>
 </div>
 @endsection

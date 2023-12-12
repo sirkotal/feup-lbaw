@@ -43,11 +43,11 @@ class CategoryController extends Controller
             $subcategoriesIds = $this->getDescendantIds($category);
             $products = Product::whereHas('categories', function ($query) use ($subcategoriesIds) {
                 $query->whereIn('category_id', $subcategoriesIds);
-            })->get();
+            })->paginate(10);
         } else {
-            $products = $category->products;
+            $products = $category->products()->paginate(10);
         }
-        return view('pages.search-category', compact('products'));
+        return view('pages.search-category', ['products' => $products,'category' => $category->category_name]);
     }
 
     private function getDescendantIds(Category $category)

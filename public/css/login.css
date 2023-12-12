@@ -108,3 +108,11 @@
     content: 'Do not have an account? ';
     color: black;
 }
+
+.reset-password  > a::before {
+    content: '';
+}
+
+#content > div > div > div > div > div.card-body > form > div.form-group.row.mb-0 > div > button{
+    background-color:#00754D;
+}

@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
+
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class WishlistController extends Controller
 {
@@ -34,9 +41,46 @@ class WishlistController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Wishlist $wishlist)
+    public function show()
     {
-        //
+        if(Auth::check()){
+            $user = Auth::user();
+            $products = $user->wishlist;
+            return view('pages.wishlist', compact('products'));
+        }
+        return view('pages.wishlist');
+    }
+    public function removeFromWishlist($id)
+    {
+        $cartItem = Wishlist::where([
+            'user_id' => auth()->id(),
+            'product_id' => $id,
+        ])->first();
+        $itemId = $id;
+        
+        if($cartItem){
+            Wishlist::where([
+                'user_id' => auth()->id(),
+                'product_id' => $id,
+            ])->delete();
+
+            return response()->json([
+                'success' => true,
+                'product_id'=> $itemId,
+            ]);
+        } 
+        return response()->json([
+            'success' => false,
+        ]);
+    }
+
+    public function addToWishlist($id)
+    {   
+        Wishlist::insert(['user_id' => auth()->id(), 'product_id' => $id]);
+        return response()->json([
+            'success' => true,
+            'product_id'=> $id,
+        ]);
     }
 
     /**
@@ -46,14 +90,9 @@ class WishlistController extends Controller
     {
         //
     }
-
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Wishlist $wishlist)
-    {
-        //
-    }
 
     /**
      * Remove the specified resource from storage.

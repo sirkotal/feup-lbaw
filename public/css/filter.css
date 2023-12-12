@@ -1,0 +1,48 @@
+.hidden {
+    display: none;
+}
+
+.test-container {
+    display: flex;
+}
+  
+.filters {
+    width: 200px;
+    color: white;
+    padding: 10px;
+}
+  
+.featured-products {
+    flex-grow: 1;
+}
+
+#filter-form {
+    background-color: #333;
+    padding: 5px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.brand-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    color: white; 
+}
+
+.brand-checkbox input[type="checkbox"][name="brands"] {
+    margin-right: 5px;
+}
+
+#min_price, #max_price {
+    width: 165px;
+}
+
+#filter-form label[for="brand"], 
+#filter-form label[for="price"] {
+    font-weight: bold;
+    font-size: 20px; 
+}

@@ -10,6 +10,8 @@ use App\Models\Category;
 use App\Models\orderedProduct;
 use App\Models\Product;
 use App\Models\paymentTransaction;
+use App\Models\Discount;
+use App\Models\Report;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +32,7 @@ class UserController extends Controller
         foreach ($orders as $order){
             $history[] = [$order,$order->products()->get()];
         }
-
+        
         return view('pages.profile')->with(['user' => $user, 'orders' => $history]);
     }
 
@@ -40,26 +42,81 @@ class UserController extends Controller
         return view('pages.edit_profile');
     }
 
-    public function showAdmin()
+    public function adminUsers()
     {  
         if (Auth::user()->id == 1){
             $users = User::all();
+            $blocked = [];
             foreach ($users as $user){
                 $status = blockAction::where('user_id', $user->id)->orderBy('id', 'desc')->first();
                 if ($status != null && $status->blocked_action == 'Blocking'){
                     $blocked[] = $status->user_id;
                 }
             }
-            $products = Product::all();
-            $categories = Category::all();
-    
-            return view('pages.admin')->with([
+
+            return view('pages.admin_users')->with([
                 'users' => $users,
                 'blocked' => $blocked,
+            ]);
+        } 
+        else{
+            return redirect()->back();
+        }
+    }
+
+    public function adminProducts(){
+        if (Auth::user()->id == 1){
+            $products = Product::paginate(10);
+            $max_id = Product::all()->max('id') + 1;
+            $categories = Category::all();
+
+            return view('pages.admin_products')->with([
                 'products' => $products,
                 'categories' => $categories,
+                'max_id' => $max_id,
             ]);
+        } 
+        else{
+            return redirect()->back();
+        }
+    }
 
+    public function adminOrders(){
+        if (Auth::user()->id == 1){
+            $orders = Order::all();
+
+            return view('pages.admin_orders')->with([
+                'orders' => $orders
+            ]);
+        } 
+        else{
+            return redirect()->back();
+        }
+    }
+
+    public function adminPromotions(){
+        if (Auth::user()->id == 1){
+            $promotions = Discount::all();
+            $max_id = Discount::all()->max('id') + 1;
+            $products = Product::all();
+
+            return view('pages.admin_promotions')->with([
+                'promotions' => $promotions,
+                'products' => $products,
+                'max_id' => $max_id,
+            ]);
+        } 
+        else{
+            return redirect()->back();
+        }
+    }
+
+    public function adminReviews(){
+        if (Auth::user()->id == 1){
+            $reports = Report::all();
+            return view('pages.admin_reviews')->with([
+                'reports' => $reports,
+            ]);
         } 
         else{
             return redirect()->back();
@@ -142,7 +199,7 @@ class UserController extends Controller
             'user_id' => $id
         ]);
 
-        return redirect()->back()->with('success', 'Action done successfully');
+        return response()->json(['message' => 'Action done successfully']);
     }
 
     /**
@@ -164,6 +221,28 @@ class UserController extends Controller
 
         DB::commit();
 
-        return redirect()->back()->with('success', 'Action done successfully');
+        return response()->json(['message' => 'Action done successfully']);
+    }
+
+    public function readNotifications($id) {
+        $user = Auth::user();
+        
+        // Retrieve the notification
+        $notification = Notification::where('user_id', $user->id)
+            ->where('id', $id)
+            ->first();
+    
+        if ($notification) {
+            // Check if the notification is not already read
+            if (!$notification->is_read) {
+                // Update 'is_read' to true only if it's currently false
+                $notification->update(['is_read' => true]);
+                return response()->json(['success' => true, 'notification_id' => $id]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Notification is already read']);
+            }
+        } else {
+            return response()->json(['success' => false, 'message' => 'Notification not found']);
+        }
     }
 }

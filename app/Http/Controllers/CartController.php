@@ -38,16 +38,24 @@ class CartController extends Controller
      */
     public function show()
     {   
-        $user = Auth::user();
-        $items = $user->shoppingCart;
-    
-        $totalPrice = 0;
+        if(Auth::check()){
+            $user = Auth::user();
+            $items = $user->shoppingCart;
+        
+            $totalPrice = 0;
 
-        foreach ($items as $item) {
-            $totalPrice += $item->price * $item->pivot->quantity;
+            foreach ($items as $item) {
+                if($item->discount){
+                    $price = number_format($item->price - ($item->price*$item->discount->percentage)/100,2);
+                } else {
+                    $price = $item->price;
+                }
+                $totalPrice += $price * $item->pivot->quantity;
+            }
+
+            return view('pages.shopping-cart',compact('items', 'totalPrice'));
         }
-
-        return view('pages.shopping-cart',compact('items', 'totalPrice'));
+        return view('pages.shopping-cart');
     }
 
     /**
@@ -91,6 +99,8 @@ class CartController extends Controller
             $newQuantity = 1;
         }
 
+        $product = Product:: where('id', $id)->first();
+
         ShoppingCart::updateOrInsert(
             ['user_id' => auth()->id(), 'product_id' => $id],
             ['quantity' => $newQuantity]
@@ -102,14 +112,19 @@ class CartController extends Controller
         $totalPrice = 0;
 
         foreach ($items as $item) {
-            $totalPrice += $item->price * $item->pivot->quantity;
+            if($item->discount){
+                $price = number_format($item->price - ($item->price*$item->discount->percentage)/100,2);
+            } else {
+                $price = $item->price;
+            }
+            $totalPrice += $price * $item->pivot->quantity;
         }
 
         return response()->json([
             'success' => true,
             'quantity' => $newQuantity,
             'product_id' => $id,
-            'price' => number_format(Product::where('id', $id)->first()->price*$newQuantity,2),
+            'price' => $product->discount ? number_format($product->price - ($product->price*$product->discount->percentage)/100,2)*$newQuantity : number_format($product->price*$newQuantity,2),
             'total' => number_format($totalPrice,2)
         ]);
     }
@@ -155,6 +170,8 @@ class CartController extends Controller
             'user_id' => auth()->id(),
             'product_id' => $id,
         ])->first();
+
+        $product = Product:: where('id', $id)->first();
     
         if ($cartItem && $cartItem->quantity > 1) {
 
@@ -170,13 +187,19 @@ class CartController extends Controller
             $totalPrice = 0;
 
             foreach ($items as $item) {
-                $totalPrice += $item->price * $item->pivot->quantity;
+                if($item->discount){
+                    $price = number_format($item->price - ($item->price*$item->discount->percentage)/100,2);
+                } else {
+                    $price = $item->price;
+                }
+                $totalPrice += $price * $item->pivot->quantity;
             }
+
             return response()->json([
                 'success' => true,
                 'quantity' => $newQuantity,
                 'product_id' => $id,
-                'price' => number_format(Product::where('id', $id)->first()->price*$newQuantity,2),
+                'price' => $product->discount ? number_format($product->price - ($product->price*$product->discount->percentage)/100,2)*$newQuantity : number_format($product->price*$newQuantity,2),
                 'total' => number_format($totalPrice,2)
             ]);
         }
@@ -198,8 +221,13 @@ class CartController extends Controller
         $totalPrice = 0;
 
         foreach ($items as $item) {
-            $totalPrice += $item->price * $item->pivot->quantity;
-        }
+                if($item->discount){
+                    $price = number_format($item->price - ($item->price*$item->discount->percentage)/100,2);
+                } else {
+                    $price = $item->price;
+                }
+                $totalPrice += $price * $item->pivot->quantity;
+            }
         
         return back();
     }
@@ -223,6 +251,34 @@ class CartController extends Controller
         return response()->json([
             'inCart' => $inCart,
             'quantity' => $quantity,
+        ]);
+    }
+
+    public function saveCartItems($id, $quantity)
+    {
+        $user = Auth::user();
+
+        $cartItem = ShoppingCart::where([
+            'user_id' => auth()->id(),
+            'product_id' => $id,
+        ])->first();
+
+        if ($cartItem) {
+            $newQuantity = $cartItem->quantity + $quantity;
+        }
+        else {
+            $newQuantity = $quantity;
+        }
+        
+        ShoppingCart::updateOrInsert(
+            ['user_id' => auth()->id(), 'product_id' => $id],
+            ['quantity' => $newQuantity]
+        );
+        // Respond with success or error message
+        return response()->json([
+            'success' => true,
+            'quantity' => $newQuantity,
+            'product_id' => $id,
         ]);
     }
 }

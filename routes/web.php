@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\CategoryController;
@@ -8,6 +9,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\StripeController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\MailController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Middleware\Authenticate;
@@ -39,54 +47,97 @@ Route::controller(RegisterController::class)->group(function () {
 });
 
 Route::controller(UserController::class)->group(function () {
-    Route::get('/user', 'show')->name('user')->middleware('auth');
-    Route::post('/user/edit_profile', 'edit')->name('edit_profile');
-    Route::get('/user/edit_profile', 'showEdit')->name('show/edit_profile')->middleware('auth');
-    Route::post('/user/edit_profile/edit_password', 'editPassword')->name('edit_password');
-    Route::get('/user/admin', 'showAdmin')->name('admin_page')->middleware('auth');
-    Route::put('/user/admin/delete_user', 'deleteUser')->name('delete_user');
-    Route::post('/user/admin/block_user', 'blockUser')->name('block_user');
-    Route::post('/user', 'editPhoto')->name('edit_photo');
+    Route::get('/profile', 'show')->name('user')->middleware('auth');
+    Route::post('/profile/edit_profile', 'edit')->name('edit_profile');
+    Route::get('/profile/edit_profile', 'showEdit')->name('show/edit_profile')->middleware('auth');
+    Route::post('/profile/edit_profile/edit_password', 'editPassword')->name('edit_password');
+    Route::get('/profile/admin/user', 'adminUsers')->name('admin_users')->middleware('auth');
+    Route::get('/profile/admin/product', 'adminProducts')->name('admin_products')->middleware('auth');
+    Route::get('/profile/admin/order', 'adminOrders')->name('admin_orders')->middleware('auth');
+    Route::get('/profile/admin/promotion', 'adminPromotions')->name('admin_promotions')->middleware('auth');
+    Route::get('/profile/admin/review', 'adminReviews')->name('admin_reviews')->middleware('auth');
+    Route::post('/profile/admin/delete_user', 'deleteUser')->name('delete_user');
+    Route::post('/profile/admin/block_user', 'blockUser')->name('block_user');
+    Route::post('/profile', 'editPhoto')->name('edit_photo');
+    Route::post('/notifications_read/{id}', 'readNotifications')->name('readNotifications');
 });
 
-Route::get('/product/{id}', [ProductController::class, 'show'])->name('showProductDetails');
+Route::controller(StaticPageController::class)->group(function () {
+    Route::get('/mainpage', 'showMainPage')->name('mainPage');
+    Route::get('/search-products', 'showSearchedProductsPage')->name('searchProducts');
+    Route::get('/faq', 'showFAQPage')->name('faq');
+    Route::get('/about', 'showAboutPage')->name('about');
+    Route::get('/checkout', 'showCheckoutPage')->middleware('auth')->name('checkoutPage');
+    Route::get('/features', 'showFeaturesPage')->name('features');
+});
 
-Route::post('/product/{id}/add_to_shoppingcart', [CartController::class, 'addToShoppingCart'])->name('addToShoppingCart');
+Route::controller(ProductController::class)->group(function () {
+    Route::get('/product/{id}', 'show')->name('showProductDetails');
+    Route::get('/search', 'search')->name('showResult');
+    Route::get('/product/{id}', 'show')->name('showProductDetails');
+    Route::post('/sort-products', 'sort')->name('sort.products');
+    Route::post('/admin/add_new_product', 'addProduct')->name('addProduct');
+    Route::post('/admin/delete_product/{id}', 'deleteProduct')->name('adminDeleteProduct');
+    Route::post('/admin/edit_product/{id}', 'edit')->name('adminEditProduct');
+    Route::post('/product_info/{id}', 'getProductInfo')->name('getProductInfo');
+    Route::get('/products/load', 'load')->name('load');
+    Route::get('products/promotions', 'promotionProducts')->name('promotions');
+});
 
-Route::post('/product/{id}/remove_from_shoppingcart', [CartController::class, 'removeFromShoppingCart'])->name('removeFromShoppingCart');
+Route::controller(CartController::class)->group(function () {
+    Route::get('/shopping-cart', 'show')->name('shoppingcart');
+    Route::get('/get_shopping_cart_status/{id}', 'getShoppingCartStatus');
+    Route::post('/product/{id}/add_to_shoppingcart', 'addToShoppingCart')->name('addToShoppingCart');
+    Route::post('/product/{id}/remove_from_shoppingcart', 'removeFromShoppingCart')->name('removeFromShoppingCart');
+    Route::post('/product/{id}/remove_from_cart_page', 'removeFromCartPage')->name('removeFromCartPage');
+    Route::post('/product/{id}/delete_from_cart', 'deleteFromCart')->name('deleteFromCart');
+    Route::post('/save-cart-items/{id}/{quantity}', 'saveCartItems')->name('saveCartItems');
+});
 
-Route::post('/product/{id}/remove_from_cart_page', [CartController::class, 'removeFromCartPage'])->name('removeFromCartPage');
+Route::controller(ReviewController::class)->group(function () {
+    Route::post('/upvote_review/{id}', 'upvoteReview')->name('upvoteReview');
+    Route::post('/submit_review/{id}', 'submitReview')->name('submitReview');
+    Route::post('/delete_review/{id}', 'deleteReview')->name('deleteReview');
+    Route::post('/update_review/{id}', 'updateReview')->name('updateReview');
+});
 
-Route::post('/product/{id}/delete_from_cart', [CartController::class, 'deleteFromCart'])->name('deleteFromCart');
+Route::controller(WishlistController::class)->group(function () {
+    Route::get('/wishlist', 'show')->name('wishlist');
+    Route::post('/wishlist/add/{id}', 'addToWishlist');
+    Route::post('/wishlist/remove/{id}', 'removeFromWishlist');
+});
 
-Route::get('/mainpage', [StaticPageController::class, 'showMainPage'])->name('mainPage');
+Route::controller(StripeController::class)->group(function () {
+    Route::get('/stripe/success', 'handleSuccess')->name('stripe.success');
+    Route::get('/stripe/cancel', 'handleCancel')->name('stripe.cancel');
+});
 
 Route::get('/category/{id}', [CategoryController::class, 'show'])->name('showProducts');
 
-Route::get('/search', [ProductController::class, 'search'])->name('showResult');
+Route::post('/report_review/{id}', [ReportController::class, 'reportReview']);
 
-Route::get('/shopping-cart', [CartController::class, 'show'])->name('shoppingcart');
+Route::post('/createOrder', [OrderController::class, 'createOrder']);
 
-Route::get('/product/{id}', [ProductController::class, 'show'])->name('showProductDetails');
+Route::post('/forgot-password', [MailController::class, 'send'])->middleware('guest');
 
-Route::get('/search-products', [StaticPageController::class, 'showSearchedProductsPage'])->name('searchProducts');
+Route::post('/profile/admin/edit_order', [OrderController::class, 'edit']);
 
-Route::post('/sort-products', [ProductController::class, 'sort'])->name('sort.products');
+Route::post('/admin/add_new_promotion', [DiscountController::class, 'addPromotion']);
 
-Route::get('/get_shopping_cart_status/{id}', [CartController::class, 'getShoppingCartStatus']);
+Route::post('/profile/admin/edit_promotion', [DiscountController::class, 'edit']);
 
-Route::get('/faq', [StaticPageController::class, 'showFAQPage'])->name('faq');
+Route::post('/admin/delete_promotion/{id}', [DiscountController::class, 'deletePromotion']);
 
-Route::get('/about', [StaticPageController::class, 'showAboutPage'])->name('about');
+Route::post('/admin/delete_report', [ReportController::class, 'deleteReport']);
 
-Route::get('/checkout', [StaticPageController::class, 'showCheckoutPage'])->middleware('auth')->name('checkoutPage');
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->middleware('guest')->name('forgotPassword');
 
-Route::post('/createOrder/{id}', [OrderController::class, 'createOrder'])->name('createOrder');
+Route::get('/reset-password/{token}', function (string $token) {
+    return view('auth.reset-password', ['token' => $token]);
+})->middleware('guest')->name('password.reset');
 
-Route::post('/admin/add_new_product', [ProductController::class, 'addProduct'])->name('addProduct');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->middleware('guest')->name('password.update');
 
-Route::post('/admin/delete_product/{id}', [ProductController::class, 'deleteProduct'])->name('adminDeleteProduct');
-
-Route::post('/admin/edit_product/{id}', [ProductController::class, 'adminEditProduct'])->name('adminEditProduct');
-
-
+Route::post('/notification/delete/{id}', [NotificationController::class, 'delete']);

@@ -10,6 +10,7 @@ class Review extends Model
     use HasFactory;
 
     protected $table = 'review';
+    public $timestamps = false;
 
     protected $fillable = [
         'review_date',

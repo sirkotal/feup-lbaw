@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Frequently Asked Questions' )
+
 @include('headers.header')
 @section('header')
     @yield('header')

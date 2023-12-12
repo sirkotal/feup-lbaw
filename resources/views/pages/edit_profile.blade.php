@@ -1,8 +1,14 @@
 @extends('layouts.app')
 
+@section('title', 'Edit Profile' )
+
 @php
     $user = Auth::user(); 
 @endphp
+
+@section('styles')
+    <link href="{{ url('css/edit_profile.css') }}" rel="stylesheet">
+@endsection
 
 @include('headers.simple-header')
 @section('header')

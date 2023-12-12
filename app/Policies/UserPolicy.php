@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-
+use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Auth;
 
 class UserPolicy
@@ -25,6 +25,11 @@ class UserPolicy
     }
 
     public function deleteUser(User $user): bool
+    {   
+        return Auth::user()->id == $user->id || Auth::user()->id == 1;
+    }
+
+    public function editProduct(User $user): bool
     {   
         return Auth::user()->id == $user->id && Auth::user()->id == 1;
     }

@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS blockAction CASCADE;
 DROP TABLE IF EXISTS wishlist CASCADE;
 DROP TABLE IF EXISTS shoppingCart CASCADE;
 DROP TABLE IF EXISTS upvote CASCADE;
+DROP TABLE IF EXISTS password_reset_tokens CASCADE;
 
 DROP TYPE IF EXISTS order_status;
 DROP TYPE IF EXISTS blocked_status;
@@ -79,6 +80,7 @@ CREATE TABLE category (
 
 CREATE TABLE discount (
    id SERIAL PRIMARY KEY,
+   name VARCHAR NOT NULL,
    start_date DATE NOT NULL,
    end_date DATE NOT NULL,
    percentage REAL NOT NULL
@@ -193,6 +195,12 @@ CREATE TABLE upvote (
    review_id INTEGER NOT NULL REFERENCES review (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+CREATE TABLE password_reset_tokens (
+    email VARCHAR(255) PRIMARY KEY,
+    token VARCHAR(255),
+    created_at TIMESTAMP NULL
+);
+
 -- INDEXES
 
 CREATE INDEX notification_user_id_idx ON "notifications" (user_id);
@@ -292,11 +300,11 @@ CREATE OR REPLACE FUNCTION add_notificationAvailability() RETURNS TRIGGER AS $BO
 DECLARE notification_id integer;
 BEGIN
   IF OLD.stock = 0 AND NEW.stock > 0 THEN
-        INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'There is stock available right now', user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id RETURNING id INTO notification_id;
-        INSERT INTO itemAvailability (notification_id, product_id) VALUES (notification_id, NEW.id);  
+        INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'There is stock available right now', user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
+        INSERT INTO itemAvailability (notification_id, product_id) SELECT id, NEW.id FROM notifications WHERE NOT EXISTS (SELECT 1 FROM changeInPrice AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM changeOfOrder AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM itemAvailability AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM paymentApproved AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM likedReview AS c WHERE c.notification_id = notifications.id);  
   ELSIF NEW.stock = 1 THEN
-        INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'LAST ITEM AVAILABLE', user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id RETURNING id INTO notification_id;
-        INSERT INTO itemAvailability (notification_id, product_id) VALUES (notification_id, NEW.id); 
+        INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'LAST ITEM AVAILABLE', user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
+        INSERT INTO itemAvailability (notification_id, product_id) SELECT id, NEW.id FROM notifications WHERE NOT EXISTS (SELECT 1 FROM changeInPrice AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM changeOfOrder AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM itemAvailability AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM paymentApproved AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM likedReview AS c WHERE c.notification_id = notifications.id); 
   END IF;
   RETURN NEW;
 END
@@ -314,10 +322,8 @@ EXECUTE PROCEDURE add_notificationAvailability();
 CREATE OR REPLACE FUNCTION add_notificationLike() RETURNS TRIGGER AS $BODY$
 DECLARE notification_id integer;
 BEGIN
-  IF OLD.upvote_count < NEW.upvote_count THEN
-    INSERT INTO notifications (notification_date, notification_text, user_id, is_read) VALUES (NOW(),'Someone Liked Your Review', NEW.user_id, false) RETURNING id INTO notification_id;
-    INSERT INTO likedReview (notification_id, review_id) VALUES (notification_id, NEW.id);  
-  END IF;
+    INSERT INTO notifications (notification_date, notification_text, user_id, is_read) VALUES (NOW(),'Someone Liked Your Review', (SELECT user_id FROM review WHERE review.id = NEW.review_id), false) RETURNING id INTO notification_id;
+    INSERT INTO likedReview (notification_id, review_id) VALUES (notification_id, NEW.review_id);  
   RETURN NEW;
 END
 $BODY$
@@ -325,11 +331,10 @@ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER notificationLike
-AFTER UPDATE ON review
+AFTER INSERT ON upvote
 FOR EACH ROW
 EXECUTE PROCEDURE add_notificationLike(); 
 
-update review set upvote_count = 11 where review.id = 1;
 
 
 -- TRIGGER 3
@@ -338,17 +343,16 @@ CREATE OR REPLACE FUNCTION add_notificationPrice() RETURNS TRIGGER AS $BODY$
 DECLARE notification_id integer;
 BEGIN
   IF OLD.price < NEW.price THEN
-     INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'The price is higher on ' || NEW.product_name, user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id RETURNING id INTO notification_id;
-     INSERT INTO changeInPrice (notification_id, product_id) VALUES (notification_id, NEW.id);  
+     INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'The price is higher on ' || NEW.product_name, user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
+     INSERT INTO changeInPrice (notification_id, product_id) SELECT id, NEW.id FROM notifications WHERE NOT EXISTS (SELECT 1 FROM changeInPrice AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM changeOfOrder AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM itemAvailability AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM paymentApproved AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM likedReview AS c WHERE c.notification_id = notifications.id);
   ELSIF OLD.price > NEW.price THEN
-	 INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'The price is lower on ' || NEW.product_name, user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id RETURNING id INTO notification_id;
-     INSERT INTO changeInPrice (notification_id, product_id) VALUES (notification_id, NEW.id);  
+     INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'The price is lower on ' || NEW.product_name, user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
+     INSERT INTO changeInPrice (notification_id, product_id) SELECT id, NEW.id FROM notifications WHERE NOT EXISTS (SELECT 1 FROM changeInPrice AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM changeOfOrder AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM itemAvailability AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM paymentApproved AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM likedReview AS c WHERE c.notification_id = notifications.id);
   END IF;
   RETURN NEW;
 END
 $BODY$
 LANGUAGE plpgsql;
-
 
 CREATE TRIGGER notificationPrice
 AFTER UPDATE ON product
@@ -369,7 +373,7 @@ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER notificationOrder
-AFTER INSERT OR UPDATE ON orders
+AFTER UPDATE ON orders
 FOR EACH ROW
 EXECUTE PROCEDURE add_notificationOrder();
 
@@ -450,23 +454,7 @@ BEFORE UPDATE ON orders
 FOR EACH ROW
 EXECUTE PROCEDURE verify_order_delete();
 
-
 -- TRIGGER 9
-
-CREATE OR REPLACE FUNCTION delete_notification_read() RETURNS TRIGGER AS $BODY$
-BEGIN
-   DELETE FROM notifications WHERE notifications.is_read = true;
-   RETURN NEW;
-END
-$BODY$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER delete_notification_read
-AFTER UPDATE ON notifications
-FOR EACH ROW
-EXECUTE PROCEDURE delete_notification_read();
-
--- TRIGGER 10
 
 CREATE OR REPLACE FUNCTION verify_time() RETURNS TRIGGER AS $BODY$
 BEGIN
@@ -484,7 +472,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE verify_time();
 
 
--- TRIGGER 11
+-- TRIGGER 10
 
 CREATE OR REPLACE FUNCTION verify_age() RETURNS TRIGGER AS $BODY$
 BEGIN
@@ -541,14 +529,15 @@ INSERT INTO category (category_name, parent_category_id) VALUES
    ('Fish & Seafood', 3),
    ('Bread', 4),
    ('Cakes & Pastries', 4),
-   ('Soup', 5);
+   ('Soup', 5),
+   ('test', NULL);
 
-INSERT INTO discount (start_date, end_date, percentage) VALUES
-   ('2023-01-01', '2023-12-31', 10),
-   ('2023-01-01', '2023-12-31', 20);
+INSERT INTO discount (name, start_date, end_date, percentage) VALUES
+   ('Christmas', '2023-01-01', '2023-12-31', 10),
+   ('Halloween', '2023-01-01', '2023-12-31', 20);
 
 INSERT INTO product (product_name, description, extra_information, price, product_path, stock, brand_id, discount_id) VALUES
-   ('Bananas', 'Fresh and ripe bananas', 'Origin: Ecuador', 1.29, '/images/products/def.png', 200, 1, NULL),
+   ('Bananas', 'Fresh and ripe bananas', 'Origin: Ecuador', 1.29, '/images/products/def.png', 200, 1, 1),
    ('Greek Yogurt', 'Creamy Greek yogurt', 'Flavor: Strawberry', 2.49, '/products/greek-yogurt', 120, 2, NULL),
    ('Chicken Breasts', 'Boneless skinless chicken breasts', 'Weight: 1 lb', 5.99, '/products/chicken-breasts', 80, 3, NULL),
    ('Green Beans', 'Fresh green beans', 'Farm-fresh produce', 3.79, '/products/green-beans', 150, 4, NULL),
@@ -568,7 +557,8 @@ INSERT INTO productCategory (product_id, category_id) VALUES
    (7, 6),  
    (8, 5),  
    (9, 2),  
-   (10, 5), 
+   (10, 5),
+   (10, 2), 
    (1, 1); 
 
 INSERT INTO orders (order_date, item_quantity, order_status, total, user_id, address, country, city, zip_code) VALUES
@@ -588,41 +578,12 @@ INSERT INTO review (review_date, rating, title, upvote_count, review_text, user_
    ('2023-02-01', 4.5, 'Great product', 10, 'This is a great product.', 1, 1),
    ('2023-02-05', 4.0, 'Good product', 5, 'This is a good product.', 2, 2);
 
-INSERT INTO notifications (notification_date, notification_text, is_read, user_id) VALUES
-   ('2023-02-10', 'New notification 1', false, 1),
-   ('2023-02-15', 'New notification 2', true, 2);
-
-INSERT INTO changeOfOrder (notification_id, order_id) VALUES
-   (1, 1),
-   (2, 2);
-
-INSERT INTO changeInPrice (notification_id, product_id) VALUES
-   (1, 1),
-   (2, 2);
-
-INSERT INTO itemAvailability (notification_id, product_id) VALUES
-   (1, 1),
-   (2, 2);
-
-INSERT INTO paymentApproved (notification_id, payment_transaction_id) VALUES
-   (1, 1),
-   (2, 2);
-
-INSERT INTO likedReview (notification_id, review_id) VALUES
-   (1, 1),
-   (2, 2);
-
 INSERT INTO report (report_date, reason, user_id, review_id) VALUES
    ('2023-03-01', 'Inappropriate content', 1, 1),
    ('2023-03-05', 'Spam', 2, 2);
 
 INSERT INTO blockAction (block_date, blocked_action, user_id) VALUES
-   ('2023-03-10', 'Blocking', 1),
    ('2023-03-15', 'Unblocking', 2);
-
-INSERT INTO wishlist (user_id, product_id) VALUES
-   (1, 1),
-   (2, 2);
 
 INSERT INTO upvote (user_id, review_id) VALUES
    (1, 2),

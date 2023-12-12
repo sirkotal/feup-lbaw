@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 
-class User extends Authenticatable
+class User extends Authenticatable implements CanResetPassword
 {
     use Notifiable;
+    use CanResetPasswordTrait;
 
     protected $table = 'users';
 
@@ -34,7 +37,7 @@ class User extends Authenticatable
 
     public function wishlist()
     {
-        return $this->belongsToMany(User::class, 'wishlist', 'product_id', 'user_id');
+        return $this->belongsToMany(Product::class, 'wishlist', 'user_id', 'product_id');
     }
 
     public function shoppingCart()
@@ -61,15 +64,34 @@ class User extends Authenticatable
 
     public function blockActionsHistory()
     {
-        return $this->hasMany(BlockAction::class, 'user_id');
+        return $this->hasMany(blockAction::class, 'user_id');
     }
 
     public function notifications()
     {
         return $this->hasMany(Notification::class, 'user_id');
     }
+
     public function getUserPath()
     {
         return $this->userPath;
+    }
+
+    public function isBlocked()
+    {
+        $blockHistory = $this->blockActionsHistory;
+
+        if ($blockHistory->isEmpty()) {
+            return false;
+        }
+
+        $lastAction = $blockHistory->last();
+
+        return $lastAction->blocked_action !== 'Unblocking';
+    }
+
+    public function passwordResetTokens()
+    {
+        return $this->hasOne(PasswordResetToken::class, 'email', 'email');
     }
 }

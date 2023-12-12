@@ -1,5 +1,7 @@
 @extends('layouts.auth')
 
+@section('title', 'Login')
+
 @section('content')
 <div class="login-page">
     <div class="left-login">
@@ -33,6 +35,9 @@
                 </button> 
             </div>
             <div class="button-container"><a class="button button-outline" href="{{ route('register') }}">Sign Up</a></div>
+            <div class="button-container reset-password">
+                <a class="button button-outline" href="{{ route('forgotPassword') }}">Forgot password</a>
+            </div>
             @if (session('success'))
                 <p class="success">
                     {{ session('success') }}

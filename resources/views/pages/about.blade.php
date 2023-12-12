@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'About Us' )
+
 @include('headers.header')
 @section('header')
     @yield('header')
