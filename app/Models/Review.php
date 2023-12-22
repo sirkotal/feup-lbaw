@@ -47,4 +47,22 @@ class Review extends Model
     {
         return $this->hasMany(LikedReview::class, 'review_id');
     }
+
+    public function scopeOrderBySortOption($query, $sortOption)
+    {
+        switch ($sortOption) {
+            case 'date_desc':
+                return $query->orderBy('review_date', 'desc');
+            case 'date_asc':
+                return $query->orderBy('review_date', 'asc');
+            case 'rating_desc':
+                return $query->orderBy('rating', 'desc');
+            case 'rating_asc':
+                return $query->orderBy('rating', 'asc');
+            case 'upvotes':
+                return $query->orderBy('upvote_count', 'desc');
+            default:
+                return $query->orderBy('review_date', 'desc');
+        }
+    }
 }

@@ -1,0 +1,47 @@
+:root {
+    --green: #00754D;
+    --grey: #D9D9D9;
+}
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+}
+
+table thead{
+    background-color: var(--green);
+    color: white
+}
+
+.table tbody tr td{
+    height: 5rem;
+}
+
+.table thead tr th{
+    height: 4rem;
+}
+
+.table tbody tr:hover td {
+    background-color: #9b9b9b;
+    color: white
+}
+
+.table{
+    margin: auto auto 2rem auto;
+}
+
+tbody tr{
+    height: 100%;
+}
+
+tr td:first-child img{
+    width: 40px;
+    height: 40px;
+    max-width: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#admin-products th{
+    width: 20%;
+}

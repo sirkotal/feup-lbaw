@@ -74,26 +74,21 @@ class OrderController extends Controller
     
             $order->save();
 
-            /* PAYMENT TRANSACTION TO BE CHANGED */
-
-            $paymentTransaction = new paymentTransaction([
-                'method' => 'Credit Card',
-                'payment_status' => 'Approved',
-                'order_id' => $order->id,
-            ]);
-    
-            $paymentTransaction->save();
-
             $lineItems = [];
 
             foreach ($shoppingCartItems as $cartItem) {
+
+                $unitAmount = $cartItem->discount
+                ? ($cartItem->price - ($cartItem->price * $cartItem->discount->percentage) / 100) * 100
+                : $cartItem->price * 100;
+
                 $lineItems[] = [
                     'price_data' => [
                         'currency' => 'eur',
                         'product_data' => [
                             'name' => $cartItem->product_name,
                         ],
-                        'unit_amount' => $cartItem->price * 100,
+                        'unit_amount' => (int) $unitAmount,
                     ],
                     'quantity' => $cartItem->pivot->quantity,
                 ];
@@ -110,12 +105,6 @@ class OrderController extends Controller
             ]);
 
             return redirect()->away($paymentIntent->url);
-
-            /*if ($paymentIntent->status !== 'succeeded') {
-                throw new \Exception('Stripe payment failed');
-            }
-    
-            return redirect()->route('user')->with('success', 'Order placed successfully!');*/
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors(['transaction-error' => 'Transaction failed: ' . $e->getMessage()]);

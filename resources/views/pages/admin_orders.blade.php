@@ -4,8 +4,11 @@
     <link href="{{ url('css/admin.css') }}" rel="stylesheet">
 @endsection
 
+@section('title', 'Admin - Orders')
+
 @section('scripts')
     <script type="text/javascript" src="{{ URL::asset('js/admin_orders.js') }}" defer></script>
+    <script type="text/javascript" src="{{ URL::asset('js/admin.js') }}" defer></script>
 @endsection
 
 @include('headers.admin-header')
@@ -31,10 +34,31 @@
     <table id="admin-orders" class="table table-striped w-75">
         <thead>
             <tr class='header'>
-                <th scope="col" class="text-center align-middle">Date</th>
-                <th scope="col" class="text-center align-middle">Address</th>
-                <th scope="col" class="text-center align-middle">User</th>
-                <th scope="col" class="text-center align-middle">Status</th>
+                <th scope="col" class="text-center align-middle" onclick="handleSorting('order_date')">
+                    Initial Date
+                    {!! Request::query('sort_column') === 'order_date' && Request::query('sort_direction') === 'asc' ? '<i class="fa fa-arrow-up"></i>' : '' !!}
+                    {!! Request::query('sort_column') === 'order_date' && Request::query('sort_direction') === 'desc' ? '<i class="fa fa-arrow-down"></i>' : '' !!}
+                </th>
+                <th scope="col" class="text-center align-middle" onclick="handleSorting('address')">
+                    Address
+                    {!! Request::query('sort_column') === 'address' && Request::query('sort_direction') === 'asc' ? '<i class="fa fa-arrow-up"></i>' : '' !!}
+                    {!! Request::query('sort_column') === 'address' && Request::query('sort_direction') === 'desc' ? '<i class="fa fa-arrow-down"></i>' : '' !!}
+                </th>
+                <th scope="col" class="text-center align-middle" onclick="handleSorting('username')">
+                    User
+                    {!! Request::query('sort_column') === 'username' && Request::query('sort_direction') === 'asc' ? '<i class="fa fa-arrow-up"></i>' : '' !!}
+                    {!! Request::query('sort_column') === 'username' && Request::query('sort_direction') === 'desc' ? '<i class="fa fa-arrow-down"></i>' : '' !!}
+                </th>
+                <th scope="col" class="text-center align-middle" onclick="handleSorting('total')">
+                    Price
+                    {!! Request::query('sort_column') === 'total' && Request::query('sort_direction') === 'asc' ? '<i class="fa fa-arrow-up"></i>' : '' !!}
+                    {!! Request::query('sort_column') === 'total' && Request::query('sort_direction') === 'desc' ? '<i class="fa fa-arrow-down"></i>' : '' !!}
+                </th>
+                <th scope="col" class="text-center align-middle" onclick="handleSorting('order_status')">
+                    Status
+                    {!! Request::query('sort_column') === 'order_status' && Request::query('sort_direction') === 'asc' ? '<i class="fa fa-arrow-up"></i>' : '' !!}
+                    {!! Request::query('sort_column') === 'order_status' && Request::query('sort_direction') === 'desc' ? '<i class="fa fa-arrow-down"></i>' : '' !!}
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -43,10 +67,11 @@
                 <td class="text-center align-middle">{{$order->order_date}}</td>
                 <td class="text-center align-middle">{{$order->address}}</td>
                 @if(!$order->user->is_deleted)
-                    <td class="text-center align-middle">{{$order->user->username}}</td>
+                    <td class="text-center align-middle"><a href="{{ route('AdminUsersDetails', ['id' => $order->user->id]) }}"><img class="mr-2" src="{{ $order->user->user_path == 'def' ?   asset('images/' . $order->user->user_path . '.png') :asset('storage/images/' . $order->user->user_path . '.png') }}">{{$order->user->username}}</a></td>
                 @else
                     <td class="text-center align-middle">[deleted-user]</td>
                 @endif
+                <td class="text-center align-middle">{{$order->total}} €</td>
                 <td class="text-center align-middle">{{$order->order_status}}</td>
                 <td class="text-center align-middle p-0"><div class="d-flex justify-content-center"><button class="edit_order"><i class="bi bi-pencil-fill"></i></button><div></td>
             </tr>
@@ -54,10 +79,11 @@
                 <td class="text-center align-middle">{{$order->order_date}}</td>
                 <td class="text-center align-middle">{{$order->address}}</td>
                 @if(!$order->user->is_deleted)
-                    <td class="text-center align-middle">{{$order->user->username}}</td>
+                    <td class="text-center align-middle"><a href="{{ route('AdminUsersDetails', ['id' => $order->user->id]) }}"><img class="mr-2" src="{{ asset('storage/images/' . $order->user->user_path . '.png') }}">{{$order->user->username}}</a></td>
                 @else
                     <td class="text-center align-middle">[deleted-user]</td>
                 @endif
+                <td class="text-center align-middle">{{$order->total}} €</td>
                 <td id='id' style="display: none">{{ $order->id }}</td>
                 <td class="text-center align-middle">
                     <select name="orders">
@@ -75,4 +101,7 @@
             @endforeach
         </tbody>
     </table>
+    <div class="links">
+        {{ $orders->links('pagination::bootstrap-5') }}
+    </div>
 @endsection

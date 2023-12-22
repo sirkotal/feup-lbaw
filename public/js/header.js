@@ -8,3 +8,8 @@ function setActive(nav_links){
 
 const nav_links = document.querySelectorAll('nav > ul > li > a');
 setActive(nav_links);
+
+function logout(){
+    isLoggedIn = false;
+    console.log(isLoggedIn);
+}

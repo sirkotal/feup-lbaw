@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+
 use Illuminate\Database\QueryException;
 use App\Models\Review;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Events\NotificationsEvent;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class ReviewController extends Controller
 {
@@ -48,15 +52,26 @@ class ReviewController extends Controller
     {
         try {
             $review = Review::findOrFail($id);
+
+            if (!Auth::check()) {
+                return response()->json(['error' => 'You cant upvote a review as a non-authenticated user.'], 400);
+            }
             
             if ($review->user_id == Auth::user()->id) {
                 return response()->json(['error' => 'You cant upvote your own review.'], 400);
             }
-
+            
+            $isUpvoted = Auth::user()->upvotedReviews()->where('review_id', $id)->exists();
+            
+            if(!$isUpvoted){
+                broadcast(new NotificationsEvent($review->user_id));
+            }
+            
             Auth::user()->upvotedReviews()->toggle($id);
-
+            
             $upvoteCount = $review->upvoters()->count();
-
+            
+            
             return response()->json([
                 'success' => 'Review upvoted successfully.',
                 'review_id' => $id, 'upvoteCount' => $upvoteCount]);

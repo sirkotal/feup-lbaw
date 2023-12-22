@@ -36,10 +36,27 @@ function deleteReview(buttons){
     });
 }
 
+function showReviews(rows) {
+    rows.forEach(row => {
+        const review = row.querySelector('td.review');
+        const id = 'review_' + row.querySelector('td#review_id').textContent + '_' + row.querySelector('td#user_id').textContent;
+        const popup = document.querySelector('div#'+id);
+        const table = document.querySelector('table#admin-reviews');
+        review.addEventListener('mouseover', () => {
+            popup.style.display = 'block';
+            popup.style.left = review.offsetLeft + (review.offsetWidth / 10) + table.offsetLeft + 'px';
+            popup.style.top = row.offsetTop + (row.offsetHeight / 5)*4 + table.offsetTop + 'px';            
+        })
+        review.addEventListener('mouseout', () => {
+            popup.style.display = 'none';           
+        })
+    });
+}
 
 
-const delete_buttons = document.querySelectorAll('.delete');
+const delete_buttons = document.querySelectorAll('#admin-reviews .delete');
 const erase_buttons = document.querySelectorAll('.erase');
-
+const viewReports = document.querySelectorAll('tr.reportInfo');
 deleteReport(delete_buttons);
 deleteReview(erase_buttons);
+showReviews(viewReports)

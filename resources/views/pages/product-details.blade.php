@@ -40,9 +40,31 @@
             });
         </script>
     @endif
+
     <div class="product-details">
         <div class="product-image">
-            <img src="{{ asset('images/products/' . $product->id . '.png') }}" alt="{{ $product->product_name }}">
+            @if(file_exists(public_path("storage/products/" . $product->id . "_1.png")))
+                <img id="productImage" src="{{ asset('storage/products/' . $product->id . '_1.png') }}" alt="{{ $product->product_name }}">
+            @php
+                $imageCount = 2;
+                $imageUrl = 'storage/products/' . $product->id . '_' . $imageCount . '.png';
+            @endphp
+            @while (file_exists(public_path($imageUrl)))
+                <div class="additional-product-image hidden">
+                    <img src="{{ asset($imageUrl) }}" alt="{{ $product->product_name }}">
+                </div>
+                @php
+                    $imageCount++;
+                    $imageUrl = 'storage/products/' . $product->id . '_' . $imageCount . '.png';
+                    @endphp
+            @endwhile
+            <div class="slide-buttons">
+                <i id="leftButton" class="bi bi-arrow-left-square-fill"></i>
+                <i id="rightButton" class="bi bi-arrow-right-square-fill"></i>
+            </div>
+            @else
+                <img src="{{ asset('images/products/default.png') }}" alt="{{ $product->product_name }}">
+            @endif
         </div>
         <div class="product-details-right">
             <div class="product-name">
@@ -72,7 +94,6 @@
                 $isUserLoggedIn = Auth::check();
                 $quantityInCart = $isUserLoggedIn ? ($shoppingCartEntry ? $shoppingCartEntry->pivot->quantity : 0) : 0;
             @endphp
-
             <button product_id="{{ $product->id }}" id="add_to_cart_button" class="add-to-cart" style="{{ $quantityInCart > 0 ? 'display: none;' : '' }}">
                 <i class="fa fa-shopping-cart"></i> Add to Cart
             </button>
@@ -96,10 +117,53 @@
             <p>
                 {{ $product->extra_information }}</p>
         </div>
-        <div class="user-reviews">
+        <div class="user-reviews" id="user-reviews">
             <h2>User Reviews</h2>
-
-            @if (Auth::check() && !auth()->user()->isBlocked())
+            @if (auth()->check() && auth()->user()->hasReviewForProduct($product->id))
+            <p> Thank you for your feedback! </p>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title" id="editTitle" >{{ $userReview->title }}</h5>
+                    <input type="text" class="form-control" id="editTitleInput" value="{{ $userReview->title }}" style="display: none;">
+                    <div class="rating" id="editRating">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= $userReview->rating)
+                                <i class="fa fa-star checked"></i>
+                            @else
+                                <i class="fa fa-star"></i>
+                            @endif
+                        @endfor
+                    </div>
+                    <div class="star-rating-input" id="editRatingInput" style="display: none;">
+                        <i class="fa fa-star" data-rating="1"></i>
+                        <i class="fa fa-star" data-rating="2"></i>
+                        <i class="fa fa-star" data-rating="3"></i>
+                        <i class="fa fa-star" data-rating="4"></i>
+                        <i class="fa fa-star" data-rating="5"></i>
+                        <input type="hidden" name="ratingInput" id="ratingInput" value="0" required>
+                    </div>
+                    <div id="ratingErrorInput"></div>
+                    <p class="card-text" id="editReviewText">{{ $userReview->review_text }}</p>
+                    <textarea class="form-control" id="editReviewTextInput" style="display: none;">{{ $userReview->review_text }}</textarea>
+                    <p class="card-text">
+                        <small class="text-muted">{{ $userReview->user->username }}</small>
+                    </p>
+                    
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">    
+                    <span class="text-muted">{{ \Carbon\Carbon::parse($userReview->review_date)->toDateString() }}</span>
+                    <span id="upvoteCount_{{ $userReview->id }}" class="text-muted">Upvotes: {{ $userReview->upvoters->count() }}</span>
+                    <div class="btn-group">
+                        @if(auth()->check() && $userReview->user_id == auth()->user()->id)
+                        <button type="button" id="deleteReviewButton" class="btn btn-danger" onclick="deleteReview('{{ $userReview->id }}')"><i class="fa fa-trash"></i> Delete</button>
+                        <button type="button" id="editButton" class="btn btn-primary" onclick="toggleEditMode()"><i class="fa fa-pencil"></i> Edit</button>
+                        <button type="button" class="btn btn-success" id="saveButton" style="display: none;" onclick="saveChanges('{{ $userReview->id }}')">Save</button>
+                        <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;" onclick="cancelEdit()">Cancel</button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @elseif (Auth::check() && !auth()->user()->isBlocked() && !Auth()->user()->is_admin)
                 <form class="review-form" action="{{ route('submitReview', ['id' => $product->id]) }}" method="post" onsubmit="return validateRating()">
                     {{ csrf_field() }}
                     <div class="form-group">
@@ -126,11 +190,30 @@
 
                     <button type="submit" class="btn btn-primary">Submit Review</button>
                 </form>
-            @else
+            @elseif (Auth::check() && auth()->user()->isBlocked())
                 <p id="blocked_warning">You are blocked and cannot submit a review.</p>
             @endif
 
-            @forelse ($product->reviews as $review)
+
+            
+
+            <div class="sorting-options">
+                <form method="get" action="{{ url()->current() }}">
+                    {{ csrf_field() }}
+                    <div class="form-group">
+                        <label for="sort_by">Sort by:</label>
+                        <select class="form-control" id="sort_by" name="sort_by" onchange="this.form.submit()">
+                            <option value="date_desc" {{ request('sort_by') === 'date_desc' ? 'selected' : '' }}>Most Recent</option>
+                            <option value="date_asc" {{ request('sort_by') === 'date_asc' ? 'selected' : '' }}>Oldest</option>
+                            <option value="rating_desc" {{ request('sort_by') === 'rating_desc' ? 'selected' : '' }}>Better Rating</option>
+                            <option value="rating_asc" {{ request('sort_by') === 'rating_asc' ? 'selected' : '' }}>Worst Rating</option>
+                            <option value="upvotes" {{ request('sort_by') === 'upvotes' ? 'selected' : '' }}>Most Upvoted</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            @forelse ($reviews as $review)
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title" id="editTitle" >{{ $review->title }}</h5>
@@ -156,11 +239,16 @@
                     <p class="card-text" id="editReviewText">{{ $review->review_text }}</p>
                     <textarea class="form-control" id="editReviewTextInput" style="display: none;">{{ $review->review_text }}</textarea>
                     <p class="card-text">
-                        <small class="text-muted">{{ $review->user->username }}</small>
+                        @if ($review->user->is_deleted == true)
+                            <small class="text-muted deleted-username">DELETED USER</small>
+                        @else
+                            <small class="text-muted">{{ $review->user->username }}</small>
+                        @endif
                     </p>
                     
                 </div>
-                <div class="card-footer d-flex justify-content-between align-items-center">
+                <div class="card-footer d-flex justify-content-between align-items-center">    
+                    <span class="text-muted">{{ \Carbon\Carbon::parse($review->review_date)->toDateString() }}</span>
                     <span id="upvoteCount_{{ $review->id }}" class="text-muted">Upvotes: {{ $review->upvoters->count() }}</span>
                     <div class="btn-group">
                         @if(auth()->check() && $review->user_id == auth()->user()->id)
@@ -171,9 +259,15 @@
                         @else
 
                         <button type="button" class="btn btn-danger"  onclick="reportReview('{{ $review->id }}')"><i class="fa fa-exclamation-triangle"></i></button>
-                        <button id="upvoteButton_{{ $review->id }}" type="button" review_id="{{ $review->id }}" class="btn btn-primary {{ auth()->check() && auth()->user()->upvotedReviews->contains($review->id) ? 'liked' : '' }} upvoteButton">
-                            <i class="fa {{ auth()->check() && auth()->user()->upvotedReviews->contains($review->id) ? 'fa-thumbs-up' : 'fa-thumbs-o-up' }}"></i>
-                        </button>
+                            @if (auth()->check())
+                            <button id="upvoteButton_{{ $review->id }}" type="button" review_id="{{ $review->id }}" class="btn btn-primary {{ auth()->check() && auth()->user()->upvotedReviews->contains($review->id) ? 'liked' : '' }} upvoteButton">
+                                <i class="fa {{ auth()->check() && auth()->user()->upvotedReviews->contains($review->id) ? 'fa-thumbs-up' : 'fa-thumbs-o-up' }}"></i>
+                            </button>
+                            @else
+                            <button id="upvoteButton_{{ $review->id }}" onclick="redirectToLoginUpvote()" type="button" review_id="{{ $review->id }}" class="btn btn-primary {{ auth()->check() && auth()->user()->upvotedReviews->contains($review->id) ? 'liked' : '' }} upvoteButton">
+                                <i class="fa {{ auth()->check() && auth()->user()->upvotedReviews->contains($review->id) ? 'fa-thumbs-up' : 'fa-thumbs-o-up' }}"></i>
+                            </button>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -181,6 +275,8 @@
             @empty
                 <p id="no_reviews">No reviews available for this product.</p>
             @endforelse
+
+            {{ $reviews->links() }}
         </div>
     </div>
     <script>
@@ -213,6 +309,17 @@
                 const cart = getCartFromLocalStorage();
                 updateUIFromCart(cart);
             });
+        }
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var sortByParam = urlParams.get('sort_by');
+        var pageParam = urlParams.get('page');
+
+        if (sortByParam || pageParam) {
+            var userReviewsSection = document.getElementById('user-reviews');
+            if (userReviewsSection) {
+                userReviewsSection.scrollIntoView({ behavior: 'instant' });
+            }
         }
     </script>
 @endsection

@@ -17,8 +17,21 @@ function showProducts(sections){
 function deleteUser(button){
     username = document.querySelector('div #Username').textContent
     button.addEventListener('click', () => {
-        sendAjaxRequest('post', '/profile/admin/delete_user', {username: username});
-        sendAjaxRequest('get','/logout', {}, () => {location.reload();});
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will lose all information relative to your account!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#00754D',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Delete my account!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                sendAjaxRequest('post', '/profile/admin/delete_user', {username: username});
+                sendAjaxRequest('get','/logout', {}, () => {location.reload();});
+            }
+        });
     });
 }
 

@@ -46,21 +46,22 @@
 
 .feature-left {
     background-color: #00754D;
-    left: -100%;
+    left: -98%;
 }
 
 .feature-right {
     background-color: #333; 
-    right: -100%;
+    right: -98%;
 }
 
-/* Hover effect */
 .feature:hover .feature-left {
     transform: translateX(100%);
+    left: -100%;
 }
 
 .feature:hover .feature-right {
     transform: translateX(-100%);
+    right: -100%;
 }
 
 .feature:hover .feature-content {

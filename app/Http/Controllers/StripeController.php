@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\paymentTransaction;
 
 class StripeController extends Controller
 {
@@ -11,6 +12,14 @@ class StripeController extends Controller
     {
         $orderId = $request->input('order_id');
         $order = Order::findOrFail($orderId);
+
+        $paymentTransaction = new paymentTransaction([
+            'method' => 'Credit Card',
+            'payment_status' => 'Approved',
+            'order_id' => $order->id,
+        ]);
+
+        $paymentTransaction->save();
 
         $order->update(['order_status' => 'Shipping']);
 

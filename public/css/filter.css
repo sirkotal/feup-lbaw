@@ -3,7 +3,8 @@
 }
 
 .test-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 25em auto;
 }
   
 .filters {
@@ -18,16 +19,17 @@
 
 #filter-form {
     background-color: #333;
-    padding: 5px;
+    padding: 1em;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    width: 24em;
+    margin: 0 auto;
 }
 
 .brand-checkbox {
-    display: flex;
     align-items: center;
     margin-bottom: 5px;
     color: white; 
@@ -37,12 +39,57 @@
     margin-right: 5px;
 }
 
-#min_price, #max_price {
-    width: 165px;
+#min-price, #max-price {
+    width: 10em;
+}
+
+#max-price {
+    margin-bottom: 5px;
 }
 
 #filter-form label[for="brand"], 
-#filter-form label[for="price"] {
-    font-weight: bold;
+#filter-form label[for="price"],
+#filter-form label[for="categories"],
+#filter-form label[for="discount"] {
     font-size: 20px; 
+    margin-bottom: 0;
+    margin-top: 10px;
+}
+
+.discount-filter {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.discount-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    color: white; 
+}
+
+.discount-option input[type="radio"] {
+    margin-right: 5px;
+}
+
+#filter-form button.btn.btn-primary{
+    background-color: var(--primary-color);
+    border: none;
+}
+
+#filter-form button.btn.btn-secondary{
+    border: none;
+}
+
+#view-more-categories > span, #view-more-brands > span{
+    text-decoration: underline;
+    color:gray;
+    cursor: pointer;
+}
+
+.filter_buttons_container{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }

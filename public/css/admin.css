@@ -49,6 +49,36 @@ tbody tr{
 
 tbody tr td:last-child{
     width: 10%;
+    background-color: #E9E9ED;
+}
+
+tbody tr.showProductInfo td:last-child:hover{
+    background-color: #751313;
+}
+
+tbody tr.showProductInfo td:last-child:hover button{
+    background-color: #751313;
+    color: white;
+}
+
+#admin-users th:first-child, #admin-products th:first-child{
+    width: 5%;
+}
+
+#admin-products tr td:nth-child(2):hover, #admin-reviews td:nth-child(4):hover{
+    text-decoration: underline;
+}
+
+#admin-users tr td:first-child img, #admin-products tr td:first-child img, #admin-reviews img, #admin-orders img{
+    width: 40px;
+    height: 40px;
+    max-width: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#admin-users tr td:first-child img:hover, #admin-products tr td:first-child img:hover{
+    filter: grayscale(0.6);
 }
 
 td div{
@@ -70,11 +100,11 @@ td div button:hover{
     width: 12%;
 }
 
-#admin-users th, #admin-orders th, #admin-reviews th{
+#admin-users th{
     width: 20%;
 }
 
-#admin-promotions th{
+#admin-promotions th, #admin-orders th, #admin-reviews th{
     width: 18%;
 }
 
@@ -110,6 +140,10 @@ button.save_edit{
     padding: 1rem
 }
 
+.toast h4{
+    border-bottom: 1px solid black;
+}
+
 .category_bundle, .product_bundle{
     line-height: 2rem;
 }
@@ -129,4 +163,129 @@ button.save_edit{
 
 .category_bundle p, .product_bundle p{
     margin: 0;
+}
+
+.unblock {
+    background-color: #751313;
+}
+
+.unblock:hover{
+    background-color: #D9D9D9;
+}
+
+.unblock i{
+    color: white;
+}
+
+.unblock:hover i{
+    color: #751313;
+}
+
+div.edit_photos{
+    display: none;
+    position: absolute;
+    background-color: #CECECE;
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    width: 50%;
+    height: 20rem;
+    padding: 2rem;
+    margin: auto;
+    z-index: 3;
+}
+
+div.edit_photos img {
+    height: 100%;
+    width: 30%;
+    object-fit: contain;
+    border-radius: 10px;
+    margin: 0 1rem;
+}
+
+div.edit_photos p {
+    padding: 1rem;
+    margin: 0;
+}
+
+div.edit_photos i.bi-chevron-right:hover, div.edit_photos i.bi-chevron-left:hover {
+    color: white;
+    transform: scale(1.2);
+    transition: transform 0.1s ease;
+}
+
+#addPhoto{
+    margin-left: 5rem;
+    gap: 2rem;
+}
+
+#addPhoto button{
+    background-color: var(--green);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    border: none;;
+}
+
+button.delete_image{
+    background-color: white;
+    border-radius: 50%;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    align-self:flex-start;
+}
+
+button.delete_image:hover{
+    color:#751313;
+    transform: scale(1.2);
+    transition: transform 0.1s ease;
+}
+
+button.close_edit{
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+button.close_edit:hover{
+    background-color: #00754D;
+    color: white;
+}
+
+div.review_details{
+    display: none;
+    position: absolute;
+    width: 25rem;
+    border: 1px solid var(--green);
+    background-color: #f9f9f9;
+    z-index: 1;
+    padding: 1rem
+}
+
+div.review_details h5{
+    margin-right: 1rem;
+}
+
+div.review_details p{
+    margin-bottom: 0rem;
+    overflow: scroll;
+    white-space: nowrap;
+}
+
+div.review_details p.review_text{
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+div.review_details .test{
+    overflow: hidden; 
+}
+
+div.review_details .review_header{
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid black;
+    margin-bottom: 1rem;
+}
+
+select {
+    width: 75%;
 }

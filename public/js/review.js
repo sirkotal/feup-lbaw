@@ -126,6 +126,8 @@ function validateEditRating() {
 function upvoteReview() {
     let upvoteButtons = document.querySelectorAll('.upvoteButton');
 
+    console.log('test');
+
     upvoteButtons.forEach(function (button) {
         button.addEventListener('click', function () {
             let data = {
@@ -139,6 +141,8 @@ function upvoteReview() {
 
 function upvoteReviewHandler() {
     let response = JSON.parse(this.responseText);
+
+    console.log('test22');
 
     let clickedButton = document.getElementById(`upvoteButton_${response.review_id}`);
     
@@ -323,6 +327,17 @@ function saveChangesHandler() {
     }
 
     cancelEdit();
+}
+
+function redirectToLoginUpvote(){
+    Swal.fire({
+        icon: "error",
+        title: "You have to be logged in to upvote!",
+        showCancelButton: true,
+        confirmButtonColor: "#00754D",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "<a href='/login' style='text-decoration: none; color: white;'> Login/Register </a>"
+    });
 }
 
 

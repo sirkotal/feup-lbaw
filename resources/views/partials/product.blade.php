@@ -4,7 +4,7 @@
             $quantityInCart = $isUserLoggedIn ? ($product->shoppers()->where('user_id', auth()->id())->first() ? $product->shoppers()->where('user_id', auth()->id())->first()->pivot->quantity : 0) : 0;
         @endphp
         <div class="product-card">
-        <a href="{{route('showProductDetails',$product->id )}}"><img title="{{ $product->product_name }}" class="product-image-mainpage" src="{{ asset( 'images/products/' . $product->id . '.png' ) }}" alt="{{ $product->product_path }}"></a>
+        <a href="{{route('showProductDetails',$product->id )}}"><img title="{{ $product->product_name }}" class="product-image-mainpage" src="{{ file_exists(public_path("storage/products/" . $product->id . "_1.png")) ? asset( 'storage/products/' . $product->id . '_1.png' ) : asset('images/products/default.png') }}" alt="{{ $product->product_path }}"></a>
         <a class="anchor" href="{{route('showProductDetails',$product->id )}}"><div class="product-name-mainpage">{{ $product->product_name }}</div></a>
             <div class="product-description-mainpage">{{ $product->brand->brand_name }}</div>
             <div class="product-score-searchpage"><p> @for ($i = 1; $i <= 5; $i++)

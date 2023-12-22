@@ -116,3 +116,34 @@
     content: 'Already have an account? ';
     color: black;
 }
+
+/* Responsive Stuff */
+@media screen and (max-width: 540px) {
+    .register-page {
+        flex-direction: column;
+    }
+
+    .left-register, .right-register {
+        flex: 1;
+        width: 100%;
+        height: auto;
+    }
+
+    .left-register h1 {
+        font-size: 24px;
+    }
+
+    .right-register h1 {
+        font-size: 22px;
+    }
+}
+
+@media screen and (max-width: 960px) {
+    .left-register h1 {
+        font-size: 32px;
+    }
+
+    .right-register h1 {
+        font-size: 30px;
+    }
+}

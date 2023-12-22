@@ -52,7 +52,7 @@ function editPromotion(buttons){
             const percentage = row.querySelector('td input[name="percentage"]').value;
             const id = row.querySelector('td#id').textContent;
             const id_pop = 'promotion_' + id;
-            const products = JSON.stringify(Array.from(document.querySelectorAll('div#'+ id_pop + ' p'), x => x.textContent));
+            const products = JSON.stringify(Array.from(document.querySelectorAll('div#'+ id_pop + ' p.products_names'), x => x.textContent));
             console.log(id_pop)
             sendAjaxRequest('post', '/profile/admin/edit_promotion', {name: name, start_date: start_date, end_date: end_date, percentage: percentage, products: products, id: id}, () => {location.reload();});
         });
@@ -80,7 +80,13 @@ function beginEditPromotions(show_sections, edit_sections){
         const table = document.querySelector('table#admin-promotions');
         const buttons = popup.querySelectorAll('button');
         const select = popup.querySelector('select[name="product"]')
+        const alert_icon = popup.querySelector('#alert i');
+        const alert = popup.querySelector('#alert p');
         edit_button.addEventListener('click', () => {
+            if (alert != null){
+                alert.classList.add('hidden');
+                alert_icon.classList.add('hidden');
+            }
             show_section.classList.add('hidden');
             edit_section.classList.remove('hidden');
             popup.style.display = 'block';
@@ -153,6 +159,7 @@ function editProducts(popups) {
                 const div = document.createElement('div');
                 div.classList.add("product_bundle", "d-flex", "justify-content-between");
                 const paragraph = document.createElement('p');
+                paragraph.classList.add('products_names');
                 paragraph.textContent = category;
                 const image = document.createElement('i');
                 image.classList.add('bi', 'bi-trash3-fill');

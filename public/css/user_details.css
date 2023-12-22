@@ -1,0 +1,165 @@
+:root {
+    --green: #00754D;
+    --grey: #D9D9D9;
+}
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.hidden{
+    display: none;
+}
+
+div#content{
+    margin: 5rem;
+    gap: 5rem;
+}
+
+#div_orders_reports, #div_reviews{
+    align-self: flex-start;
+    flex-grow: 1;
+}
+
+table thead{
+    background-color: var(--green);
+    color: white
+}
+
+.table tbody tr td{
+    height: 5rem;
+}
+
+.table thead tr th{
+    height: 4rem;
+}
+
+.table tbody tr:hover td {
+    background-color: #9b9b9b;
+    color: white
+}
+
+.table{
+    margin: auto auto 2rem auto;
+}
+
+tbody tr{
+    height: 100%;
+}
+
+tbody tr td:last-child{
+    width: 10%;
+    background-color: #E9E9ED;
+}
+
+tbody tr:hover td:last-child{
+    background-color: #E9E9ED;
+}
+
+td div{
+    height: 100%;
+}
+
+td div button{
+    border: none;
+    flex-grow: 1;
+    width: 50%
+}
+
+td div button:hover{
+    background-color: #751313;
+    color: white;
+}
+
+#admin-orders th, #admin-reviews th{
+    width: 22%;
+}
+
+#admin-reviews th{
+    width: 18%;
+}
+
+select {
+    width: 75%;
+}
+
+#admin-reviews img, #reviews img, .card-body img{
+    width: 40px;
+    height: 40px;
+    max-width: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.toast {
+    display: none;
+    position: absolute;
+    width: 15rem;
+    border: 1px solid var(--green);
+    background-color: #f9f9f9;
+    z-index: 1;
+    padding: 1rem
+}
+
+div.review_details{
+    display: none;
+    position: absolute;
+    width: 25rem;
+    border: 1px solid var(--green);
+    background-color: #f9f9f9;
+    z-index: 1;
+    padding: 1rem
+}
+
+div.review_details h5{
+    margin-right: 1rem;
+}
+
+div.review_details p{
+    margin-bottom: 0rem;
+    overflow: scroll;
+    white-space: nowrap;
+}
+
+div.review_details p.review_text{
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+div.review_details .test{
+    overflow: hidden; 
+}
+
+div.review_details .review_header{
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid black;
+    margin-bottom: 1rem;
+}
+
+.unblock {
+    background-color: #751313;
+}
+
+.unblock:hover{
+    background-color: #D9D9D9;
+}
+
+.unblock i{
+    color: white;
+}
+
+.unblock:hover i{
+    color: #751313;
+}
+
+#content button{
+    border: none;
+    flex-grow: 1;
+    width: 50%
+}
+
+#content button:hover{
+    background-color: #751313;
+    color: white;
+}

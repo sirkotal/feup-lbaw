@@ -94,4 +94,9 @@ class User extends Authenticatable implements CanResetPassword
     {
         return $this->hasOne(PasswordResetToken::class, 'email', 'email');
     }
+
+    public function hasReviewForProduct($productId)
+    {
+        return $this->reviews()->where('product_id', $productId)->exists();
+    }
 }

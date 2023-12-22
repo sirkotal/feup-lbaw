@@ -63,7 +63,12 @@
       </h4>
       @foreach($cartItems as $cartItem)
             <p><a href="{{ route('showProductDetails',$cartItem->id) }}">{{ $cartItem->product_name }}</a> 
+            @if($cartItem->discount)
+            <span class="price">{{ number_format(($cartItem->price - ($cartItem->price * $cartItem->discount->percentage)/100) * $cartItem->pivot->quantity, 2) }}€ ({{ $cartItem->pivot->quantity }})</span></p>
+
+            @else
             <span class="price">{{ $cartItem->price * $cartItem->pivot->quantity }}€ ({{ $cartItem->pivot->quantity }})</span></p>
+            @endif
       @endforeach
       <hr>
       <p>Total <span class="price" style="color:black"><b>{{ $totalCost }}€</b></span></p>

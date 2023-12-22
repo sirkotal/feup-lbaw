@@ -25,7 +25,7 @@ function redirect(button) {
 function deleteUser(buttons){
     buttons.forEach((button) => {
         const row = button.closest('.userInfo');
-        const username = row.querySelector('td:first-child').textContent;
+        const username = row.querySelector('td#username').textContent;
         button.addEventListener('click', () => {
             sendAjaxRequest('post', '/profile/admin/delete_user', {username: username}, () => {location.reload();})
         });
@@ -35,7 +35,7 @@ function deleteUser(buttons){
 function blockUser(buttons){
     buttons.forEach((button) => {
         const row = button.closest('.userInfo');
-        const username = row.querySelector('td:first-child').textContent;
+        const username = row.querySelector('td#username').textContent;
         button.addEventListener('click', () => {
             sendAjaxRequest('post', '/profile/admin/block_user', {username: username, action: 'Blocking'}, () => {location.reload();})
         });
@@ -45,7 +45,7 @@ function blockUser(buttons){
 function unblockUser(buttons){
     buttons.forEach((button) => {
         const row = button.closest('.userInfo');
-        const username = row.querySelector('td:first-child').textContent;
+        const username = row.querySelector('td#username').textContent;
         button.addEventListener('click', () => {
             sendAjaxRequest('post', '/profile/admin/block_user', {username: username, action: 'Unblocking'}, () => {location.reload();});
         });

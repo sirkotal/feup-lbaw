@@ -13,6 +13,7 @@
 
 .product-image img {
   max-width: 100%;
+  max-height: 40em;
   margin: 0; 
 }
 
@@ -21,6 +22,17 @@
   grid-column: 1/2;
   grid-row: 1/2;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#leftButton, #rightButton {
+  color: #333;
+  font-size: 24px;
+  margin: 5px;
+  cursor: pointer;
 }
 
 .product-details-right{
@@ -85,6 +97,9 @@
   .add-to-wishlist button {
     width: 100%;
     margin-left: 0px;
+  }
+  .product-image{
+    max-width: 140px;
   }
 }
 
@@ -344,4 +359,14 @@
 
 #saveButton:hover {
   background-color: #042d20;
+}
+
+.deleted-username{
+  text-decoration: line-through;
+  text-decoration-color: red;
+  font-weight: bold;
+}
+
+#sort_by{
+  width: max-content;
 }

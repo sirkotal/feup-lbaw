@@ -48,7 +48,7 @@ class ReportController extends Controller
 
     public function deleteReport(Request $request){
         $this->authorize('deleteReport', Report::class);
-        $report = Report::where('user_id', $request->input('user_id'))->where('user_id', $request->input('review_id'));
+        $report = Report::where('user_id', $request->input('user_id'))->where('review_id', $request->input('review_id'));
         $report->delete();
         return redirect()->route('admin_products')->with('success', 'Report deleted successfully!');
     }

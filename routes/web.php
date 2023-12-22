@@ -58,8 +58,10 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/profile/admin/review', 'adminReviews')->name('admin_reviews')->middleware('auth');
     Route::post('/profile/admin/delete_user', 'deleteUser')->name('delete_user');
     Route::post('/profile/admin/block_user', 'blockUser')->name('block_user');
-    Route::post('/profile', 'editPhoto')->name('edit_photo');
+    Route::post('/profile/edit_photo', 'editPhoto')->name('edit_photo');
     Route::post('/notifications_read/{id}', 'readNotifications')->name('readNotifications');
+    Route::get('/profile/admin/user_details/{id}', 'userDetails')->name('AdminUsersDetails')->middleware('auth');
+    Route::get('/profile/admin/statistics', 'statistics')->name('Statistics')->middleware('auth');
 });
 
 Route::controller(StaticPageController::class)->group(function () {
@@ -75,10 +77,11 @@ Route::controller(ProductController::class)->group(function () {
     Route::get('/product/{id}', 'show')->name('showProductDetails');
     Route::get('/search', 'search')->name('showResult');
     Route::get('/product/{id}', 'show')->name('showProductDetails');
-    Route::post('/sort-products', 'sort')->name('sort.products');
     Route::post('/admin/add_new_product', 'addProduct')->name('addProduct');
     Route::post('/admin/delete_product/{id}', 'deleteProduct')->name('adminDeleteProduct');
     Route::post('/admin/edit_product/{id}', 'edit')->name('adminEditProduct');
+    Route::post('/admin/edit_product/delete_photo/{id}', 'deletePhoto')->name('adminDeletePhoto');
+    Route::post('/admin/edit_product/add_photo/{id}', 'addPhoto')->name('adminAddPhoto');
     Route::post('/product_info/{id}', 'getProductInfo')->name('getProductInfo');
     Route::get('/products/load', 'load')->name('load');
     Route::get('products/promotions', 'promotionProducts')->name('promotions');
@@ -112,23 +115,25 @@ Route::controller(StripeController::class)->group(function () {
     Route::get('/stripe/cancel', 'handleCancel')->name('stripe.cancel');
 });
 
+Route::controller(DiscountController::class)->group(function () {
+    Route::post('/admin/add_new_promotion', 'addPromotion');
+    Route::post('/profile/admin/edit_promotion', 'edit');
+    Route::post('/admin/delete_promotion/{id}', 'deletePromotion');
+});
+
+Route::controller(OrderController::class)->group(function () {
+    Route::post('/createOrder', 'createOrder')->name('createOrder');
+    Route::post('/profile/admin/edit_order', 'edit');
+});
+
+Route::controller(ReportController::class)->group(function () {
+    Route::post('/report_review/{id}', 'reportReview');
+    Route::post('/admin/delete_report', 'deleteReport');
+});
+
 Route::get('/category/{id}', [CategoryController::class, 'show'])->name('showProducts');
 
-Route::post('/report_review/{id}', [ReportController::class, 'reportReview']);
-
-Route::post('/createOrder', [OrderController::class, 'createOrder']);
-
 Route::post('/forgot-password', [MailController::class, 'send'])->middleware('guest');
-
-Route::post('/profile/admin/edit_order', [OrderController::class, 'edit']);
-
-Route::post('/admin/add_new_promotion', [DiscountController::class, 'addPromotion']);
-
-Route::post('/profile/admin/edit_promotion', [DiscountController::class, 'edit']);
-
-Route::post('/admin/delete_promotion/{id}', [DiscountController::class, 'deletePromotion']);
-
-Route::post('/admin/delete_report', [ReportController::class, 'deleteReport']);
 
 Route::get('/forgot-password', function () {
     return view('auth.forgot-password');
@@ -141,3 +146,4 @@ Route::get('/reset-password/{token}', function (string $token) {
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->middleware('guest')->name('password.update');
 
 Route::post('/notification/delete/{id}', [NotificationController::class, 'delete']);
+Route::get('/last_notification', [NotificationController::class, 'show']);

@@ -143,3 +143,9 @@
     color: white;
     cursor: pointer;
 }
+
+@media (max-width: 768px) {
+    .cart-img{
+        display: none;
+    }
+}

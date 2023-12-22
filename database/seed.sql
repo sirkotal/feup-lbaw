@@ -44,7 +44,8 @@ CREATE TABLE users (
    password VARCHAR(256) NOT NULL,
    phone_number VARCHAR(256),
    email VARCHAR(256) UNIQUE NOT NULL,
-   is_deleted BOOL DEFAULT false NOT NULL
+   is_deleted BOOL DEFAULT false NOT NULL,
+   is_admin BOOL DEFAULT false NOT NULL
 );
 
 CREATE TABLE orders (
@@ -342,11 +343,11 @@ EXECUTE PROCEDURE add_notificationLike();
 CREATE OR REPLACE FUNCTION add_notificationPrice() RETURNS TRIGGER AS $BODY$
 DECLARE notification_id integer;
 BEGIN
-  IF OLD.price < NEW.price THEN
-     INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'The price is higher on ' || NEW.product_name, user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
+  IF (NEW.discount_id IS NOT NULL AND OLD.discount_id IS NULL) THEN
+     INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), NEW.product_name || ' is now on discount!', user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
      INSERT INTO changeInPrice (notification_id, product_id) SELECT id, NEW.id FROM notifications WHERE NOT EXISTS (SELECT 1 FROM changeInPrice AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM changeOfOrder AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM itemAvailability AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM paymentApproved AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM likedReview AS c WHERE c.notification_id = notifications.id);
-  ELSIF OLD.price > NEW.price THEN
-     INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'The price is lower on ' || NEW.product_name, user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
+  ELSIF (NEW.discount_id IS NOT NULL AND OLD.discount_id IS NOT NULL AND OLD.discount_id != NEW.discount_id) THEN
+     INSERT INTO notifications (notification_date, notification_text, user_id, is_read) SELECT NOW(), 'New discount on ' || NEW.product_name, user_id, false FROM Wishlist WHERE Wishlist.product_id = NEW.id;
      INSERT INTO changeInPrice (notification_id, product_id) SELECT id, NEW.id FROM notifications WHERE NOT EXISTS (SELECT 1 FROM changeInPrice AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM changeOfOrder AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM itemAvailability AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM paymentApproved AS c WHERE c.notification_id = notifications.id) AND NOT EXISTS (SELECT 1 FROM likedReview AS c WHERE c.notification_id = notifications.id);
   END IF;
   RETURN NEW;
@@ -354,17 +355,39 @@ END
 $BODY$
 LANGUAGE plpgsql;
 
+-- TRIGGER 3^-1
+
 CREATE TRIGGER notificationPrice
 AFTER UPDATE ON product
 FOR EACH ROW
 EXECUTE PROCEDURE add_notificationPrice();
+
+CREATE OR REPLACE FUNCTION delete_notificationsAndChangeInPriceOnDiscountRemoval() RETURNS TRIGGER AS $BODY$
+DECLARE
+  notification_id_to_delete INTEGER;
+BEGIN
+  IF (OLD.discount_id IS NOT NULL AND NEW.discount_id IS NULL) THEN
+    SELECT notification_id INTO notification_id_to_delete FROM changeInPrice WHERE product_id = OLD.id;
+    DELETE FROM notifications WHERE id = notification_id_to_delete;
+    DELETE FROM changeInPrice WHERE product_id = OLD.id;
+  END IF;
+  RETURN NEW;
+END
+$BODY$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER deleteNotificationsAndChangeInPriceOnDiscountRemoval
+AFTER UPDATE ON product
+FOR EACH ROW
+WHEN (OLD.discount_id IS NOT NULL AND NEW.discount_id IS NULL)
+EXECUTE PROCEDURE delete_notificationsAndChangeInPriceOnDiscountRemoval();
 
 -- TRIGGER 4
 
 CREATE OR REPLACE FUNCTION add_notificationOrder() RETURNS TRIGGER AS $BODY$
 DECLARE notification_id integer;
 BEGIN
-    INSERT INTO notifications (notification_date, notification_text, user_id, is_read) VALUES (NOW(), 'Order Status: ' || NEW.order_status, NEW.user_id, false) RETURNING id INTO notification_id;
+    INSERT INTO notifications (notification_date, notification_text, user_id, is_read) VALUES (NOW(), NEW.order_status, NEW.user_id, false) RETURNING id INTO notification_id;
     INSERT INTO changeOfOrder (notification_id, order_id) VALUES (notification_id, NEW.id);   
     RETURN NEW;
 END
@@ -492,77 +515,176 @@ EXECUTE PROCEDURE verify_age();
 
 -- POPULATE
 
+INSERT INTO users (username, user_path, date_of_birth, password, email, phone_number, is_admin) VALUES
+   ('sergio', 'def', '1990-2-14', '$2y$10$2WzRs0g68ZQnote4JIz2SOge7me5V88u22SqKCcslGJNwlpncyXUC', 'lbaw2345@gmail.com', 918238492, true);
+   
 INSERT INTO users (username, user_path, date_of_birth, password, email, phone_number) VALUES
-   ('sergio', 'def', '1990-2-14', '$2y$10$2WzRs0g68ZQnote4JIz2SOge7me5V88u22SqKCcslGJNwlpncyXUC', 'lbaw2345@gmail.com', 918238492),
    ('saul_goodman', 'def', '1999-10-08', '$2y$10$2WzRs0g68ZQnote4JIz2SOge7me5V88u22SqKCcslGJNwlpncyXUC', 'thegoodmansaul@gmail.com' ,918223849),
    ('pescator', 'def', '1999-10-08', '$2y$10$2WzRs0g68ZQnote4JIz2SOge7me5V88u22SqKCcslGJNwlpncyXUC', 'mlgpescator@gmail.com', 918239029),
    ('impostor', 'def', '1978-07-27', 'venting', 'sussyamongus@outlook.com', 915623849),
    ('mr-white', 'def', '2003-05-10', 'albuquerque', 'walterwhite@outlook.com', 918258619);
 
 INSERT INTO brand (brand_name) VALUES
-   ('Coca-Cola'),
-   ('Nestlé'),
-   ('Kellogg''s'),
-   ('Heinz'),
    ('Pepsi'),
-   ('Campbell''s'),
-   ('Danone'),
-   ('Hershey''s'),
+   ('Nestle'),
+   ('Kellogg''s'),
+   ('General Mills'),
+   ('Heinz'),
    ('Kraft'),
    ('Unilever'),
-   ('General Mills'),
-   ('Johnsonville'),
-   ('Perdue');
+   ('Danone'),
+   ('Campbell''s'),
+   ('Hershey''s'),
+   ('Procter & Gamble'),
+   ('Johnson & Johnson'),
+   ('Mars'),
+   ('Mondelez International'),
+   ('Conagra Brands'),
+   ('Cargill'),
+   ('Archer Daniels Midland'),
+   ('Coca-Cola Enterprises'),
+   ('Colgate-Palmolive'),
+   ('Tyson Foods');
 
 INSERT INTO category (category_name, parent_category_id) VALUES
    ('Fresh Produce', NULL),
+   ('Beverages', NULL),
    ('Dairy & Eggs', NULL),
-   ('Meat & Seafood', NULL),
    ('Bakery', NULL),
-   ('Canned Goods', NULL),
-   ('Fruits', 1),
+   ('Meat & Seafood', NULL),
+   ('Pantry Staples', NULL),
+   ('Snacks', NULL),
+   ('Frozen Foods', NULL),
+   ('Health & Beauty', NULL),
+   ('Household', NULL),
+   ('Baby & Kids', NULL),
+   ('Pet Supplies', NULL),
+   ('Organic', NULL),
    ('Vegetables', 1),
-   ('Milk & Cream', 2),
-   ('Cheese', 2),
-   ('Beef', 3),
-   ('Poultry', 3),
-   ('Fish & Seafood', 3),
+   ('Fruits', 1),
+   ('Juices', 2),
+   ('Sodas', 2),
+   ('Milk & Cream', 3),
+   ('Cheese', 3),
    ('Bread', 4),
    ('Cakes & Pastries', 4),
-   ('Soup', 5),
-   ('test', NULL);
+   ('Beef', 5),
+   ('Chicken', 5),
+   ('Canned Goods', 6),
+   ('Grains & Pasta', 6),
+   ('Chips & Crisps', 7),
+   ('Chocolate & Candy', 7),
+   ('Frozen Meals', 8),
+   ('Ice Cream', 8),
+   ('Skincare', 9),
+   ('Hair Care', 9),
+   ('Cleaning Supplies', 10),
+   ('Laundry', 10),
+   ('Baby Food', 11),
+   ('Toys', 11),
+   ('Pet Food', 12),
+   ('Pet Toys', 12),
+   ('Organic Vegetables', 13),
+   ('Organic Fruits', 13);
 
 INSERT INTO discount (name, start_date, end_date, percentage) VALUES
-   ('Christmas', '2023-01-01', '2023-12-31', 10),
-   ('Halloween', '2023-01-01', '2023-12-31', 20);
+   ('Christmas', '2023-01-01', '2023-12-20', 10),
+   ('Halloween', '2023-01-01', '2023-12-19', 20);
 
 INSERT INTO product (product_name, description, extra_information, price, product_path, stock, brand_id, discount_id) VALUES
-   ('Bananas', 'Fresh and ripe bananas', 'Origin: Ecuador', 1.29, '/images/products/def.png', 200, 1, 1),
+   ('Bananas', 'Fresh and ripe bananas', 'Origin: Ecuador', 1.29, '/images/products/bananas.png', 200, 1, 1),
    ('Greek Yogurt', 'Creamy Greek yogurt', 'Flavor: Strawberry', 2.49, '/products/greek-yogurt', 120, 2, NULL),
-   ('Chicken Breasts', 'Boneless skinless chicken breasts', 'Weight: 1 lb', 5.99, '/products/chicken-breasts', 80, 3, NULL),
-   ('Green Beans', 'Fresh green beans', 'Farm-fresh produce', 3.79, '/products/green-beans', 150, 4, NULL),
-   ('Orange Juice', 'Freshly squeezed orange juice', 'No added sugars', 4.99, '/products/orange-juice', 100, 5, NULL),
-   ('Spaghetti', 'Italian pasta spaghetti', 'Durum wheat semolina', 1.79, '/products/spaghetti', 180, 6, NULL),
-   ('Tomatoes', 'Ripe and juicy tomatoes', 'Variety: Roma', 2.29, '/products/tomatoes', 130, 7, NULL),
-   ('Toilet Paper', 'Soft and absorbent toilet paper', 'Pack of 12 rolls', 8.99, '/products/toilet-paper', 90, 8, NULL),
-   ('Almond Milk', 'Unsweetened almond milk', 'Vegan and dairy-free', 3.49, '/products/almond-milk', 110, 9, NULL),
-   ('Frozen Pizza', 'Classic pepperoni frozen pizza', 'Family size', 7.49, '/products/frozen-pizza', 70, 10, NULL);
+   ('Apples', 'Crisp and juicy apples', 'Variety: Granny Smith', 1.99, '/images/products/apples.png', 180, 1, NULL),
+   ('Orange Juice', 'Freshly squeezed orange juice', 'No added sugar', 3.49, '/products/orange-juice', 90, 2, 2),
+   ('Cheddar Cheese', 'Sharp cheddar cheese block', 'Aged: 12 months', 4.79, '/images/products/cheddar-cheese.png', 75, 3, NULL),
+   ('Whole Wheat Bread', 'Nutritious whole wheat bread', 'Sliced', 2.99, '/products/whole-wheat-bread', 100, 4, NULL),
+   ('Ground Beef', 'Lean ground beef', 'Grass-fed', 5.49, '/images/products/ground-beef.png', 50, 5, NULL),
+   ('Canned Tomatoes', 'Diced tomatoes in can', 'Organic', 1.79, '/products/canned-tomatoes', 120, 6, NULL),
+   ('Potato Chips', 'Crunchy potato chips', 'Flavor: BBQ', 2.29, '/images/products/potato-chips.png', 150, 7, NULL),
+   ('Dark Chocolate Bar', 'Rich dark chocolate', 'Cocoa Percentage: 70%', 3.99, '/products/dark-chocolate', 80, 9, NULL),
+   ('Frozen Pizza', 'Classic frozen pizza', 'Toppings: Pepperoni', 6.99, '/images/products/frozen-pizza.png', 40, 8, NULL),
+   ('Shampoo', 'Gentle cleansing shampoo', 'For all hair types', 5.49, '/products/shampoo', 110, 10, NULL),
+   ('Dish Soap', 'Effective dishwashing soap', 'Lemon Scented', 2.99, '/images/products/dish-soap.png', 200, 10, NULL),
+   ('Baby Cereal', 'Nutritious baby cereal', 'Stage: 1', 3.29, '/products/baby-cereal', 80, 11, NULL),
+   ('Cat Food', 'Premium cat food', 'Flavor: Salmon', 4.49, '/images/products/cat-food.png', 60, 12, NULL),
+   ('Organic Carrots', 'Fresh organic carrots', 'Locally sourced', 2.49, '/products/organic-carrots', 150, 13, NULL),
+   ('Strawberries', 'Juicy and sweet strawberries', 'Freshly picked', 2.99, '/images/products/strawberries.png', 120, 1, NULL),
+   ('Sparkling Water', 'Refreshing sparkling water', 'Lemon Flavor', 1.49, '/products/sparkling-water', 180, 2, NULL),
+   ('Mozzarella Cheese', 'Creamy mozzarella cheese', 'Fresh', 3.99, '/images/products/mozzarella-cheese.png', 90, 3, NULL),
+   ('Bagels', 'Soft and chewy bagels', 'Variety: Plain', 2.29, '/products/bagels', 150, 4, NULL),
+   ('Salmon Fillet', 'Fresh salmon fillet', 'Wild-caught', 9.99, '/images/products/salmon-fillet.png', 40, 5, NULL),
+   ('Pasta Sauce', 'Tomato pasta sauce', 'Garlic & Herb', 2.79, '/products/pasta-sauce', 120, 6, NULL),
+   ('Tortilla Chips', 'Crunchy tortilla chips', 'Gluten-free', 2.79, '/images/products/tortilla-chips.png', 100, 7, NULL),
+   ('Milk Chocolate Bar', 'Smooth milk chocolate', 'Family size', 2.49, '/products/milk-chocolate', 120, 9, NULL),
+   ('Frozen Vegetables Mix', 'Assorted frozen vegetables', 'Peas, carrots, corn', 2.99, '/images/products/frozen-vegetables.png', 80, 8, NULL),
+   ('Conditioner', 'Nourishing hair conditioner', 'Argan Oil', 6.49, '/products/conditioner', 90, 10, NULL),
+   ('All-Purpose Cleaner', 'Versatile cleaning solution', 'Lavender Scent', 3.49, '/images/products/all-purpose-cleaner.png', 160, 10, NULL),
+   ('Baby Wipes', 'Gentle baby wipes', 'Sensitive Skin', 4.29, '/products/baby-wipes', 70, 11, NULL),
+   ('Dog Food', 'Nutritious dog food', 'Grain-free', 7.99, '/images/products/dog-food.png', 100, 12, NULL),
+   ('Organic Spinach', 'Fresh organic spinach', 'Locally grown', 3.49, '/products/organic-spinach', 130, 13, NULL),
+   ('Avocados', 'Ripe avocados', 'Variety: Hass', 1.99, '/images/products/avocados.png', 150, 1, NULL),
+   ('Green Tea', 'Premium green tea', 'Organic', 3.49, '/products/green-tea', 100, 2, NULL),
+   ('Swiss Cheese', 'Mild Swiss cheese', 'Sliced', 4.29, '/images/products/swiss-cheese.png', 80, 3, NULL),
+   ('Croissants', 'Flaky butter croissants', 'Freshly baked', 2.79, '/products/croissants', 120, 4, NULL),
+   ('Shrimp', 'Fresh shrimp', 'Peeled and deveined', 12.99, '/images/products/shrimp.png', 60, 5, NULL),
+   ('Rice', 'Long-grain white rice', 'Non-GMO', 5.49, '/products/rice', 90, 6, NULL),
+   ('Popcorn', 'Classic popcorn kernels', 'Butter Flavor', 1.99, '/images/products/popcorn.png', 150, 7, NULL),
+   ('White Chocolate Bar', 'Sweet white chocolate', 'Creamy texture', 3.99, '/products/white-chocolate', 80, 9, NULL),
+   ('Frozen Fruits Mix', 'Assorted frozen fruits', 'Strawberries, blueberries, mango', 6.99, '/images/products/frozen-fruits.png', 70, 8, NULL),
+   ('Leave-In Conditioner', 'Moisturizing leave-in conditioner', 'Coconut Oil', 7.49, '/products/leave-in-conditioner', 70, 10, NULL),
+   ('Glass Cleaner', 'Streak-free glass cleaner', 'Ammonia-Free', 4.99, '/images/products/glass-cleaner.png', 120, 10, NULL),
+   ('Baby Lotion', 'Gentle baby lotion', 'Calendula Extract', 5.29, '/products/baby-lotion', 90, 11, NULL),
+   ('Cat Litter', 'Clumping cat litter', 'Odor control', 8.99, '/images/products/cat-litter.png', 80, 12, NULL),
+   ('Organic Tomatoes', 'Fresh organic tomatoes', 'Vine-ripened', 2.79, '/products/organic-tomatoes', 100, 13, NULL);
 
 INSERT INTO productCategory (product_id, category_id) VALUES
-   (2, 8),  
-   (3, 11), 
-   (4, 7),  
-   (5, 12), 
-   (6, 13), 
-   (7, 6),  
-   (8, 5),  
-   (9, 2),  
-   (10, 5),
-   (10, 2), 
-   (1, 1); 
+   (1, 15), 
+   (2, 18), 
+   (3, 15), 
+   (4, 16), 
+   (5, 19), 
+   (6, 20), 
+   (7, 22), 
+   (8, 24), 
+   (9, 26), 
+   (10, 30), 
+   (11, 28), 
+   (12, 31), 
+   (13, 32), 
+   (14, 34), 
+   (15, 36), 
+   (16, 38), 
+   (17, 15), 
+   (18, 16), 
+   (19, 19), 
+   (20, 20), 
+   (21, 22), 
+   (22, 24), 
+   (23, 26), 
+   (24, 30), 
+   (25, 28), 
+   (26, 31), 
+   (27, 32), 
+   (28, 34), 
+   (29, 36), 
+   (30, 38), 
+   (31, 15), 
+   (32, 16), 
+   (33, 19), 
+   (34, 20), 
+   (35, 22), 
+   (36, 24), 
+   (37, 26), 
+   (38, 30), 
+   (39, 28),
+   (40, 31), 
+   (41, 32), 
+   (42, 34), 
+   (43, 36), 
+   (44, 38); 
 
 INSERT INTO orders (order_date, item_quantity, order_status, total, user_id, address, country, city, zip_code) VALUES
-   ('2023-01-15', 3, 'Shipping', 150.0, 3, '123 Main St', 'USA', 'New York', '10001'),
+   ('2023-01-15', 3, 'Shipping', 150.0, 2, '123 Main St', 'USA', 'New York', '10001'),
    ('2023-01-20', 2, 'Payment Approved', 150.0, 2, '456 Oak St', 'Canada', 'Toronto', '13133');
 
 
@@ -572,17 +694,19 @@ INSERT INTO paymentTransaction (method, payment_status, order_id) VALUES
 
 INSERT INTO orderedProduct (quantity, price_bought, product_id, order_id) VALUES
    (3, 150.0, 1, 1),
+   (3, 150.0, 2, 1),
    (2, 150.0, 2, 2);
 
 INSERT INTO review (review_date, rating, title, upvote_count, review_text, user_id, product_id) VALUES
-   ('2023-02-01', 4.5, 'Great product', 10, 'This is a great product.', 1, 1),
-   ('2023-02-05', 4.0, 'Good product', 5, 'This is a good product.', 2, 2);
+   ('2023-02-01', 4.5, 'Great product', 10, 'This is a great product.', 3, 1),
+   ('2023-02-05', 4.0, 'Good product', 5, 'This is a good product.', 3, 2);
 
 INSERT INTO report (report_date, reason, user_id, review_id) VALUES
-   ('2023-03-01', 'Inappropriate content', 1, 1),
-   ('2023-03-05', 'Spam', 2, 2);
+   ('2023-03-05', 'Spam', 2, 1),
+   ('2023-03-01', 'Inappropriate content', 1, 1);
 
 INSERT INTO blockAction (block_date, blocked_action, user_id) VALUES
+   ('2023-03-15', 'Blocking', 2),
    ('2023-03-15', 'Unblocking', 2);
 
 INSERT INTO upvote (user_id, review_id) VALUES

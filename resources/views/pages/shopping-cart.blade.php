@@ -24,7 +24,7 @@
         <div class="cart-checkout" style="display: none;">
             <p>Resume</p>
             <p>Subtotal: <span id="subtotal"></span>€</p>
-            <p>Shippment Cost: Free</p>
+            <p>Shipment Cost: Free</p>
             <p>Total: <span id="total"></span>€</p>
             <button onClick="redirectToLogin()" id="visitor-checkout">Checkout</button>
         </div>
@@ -37,7 +37,7 @@
     <div class="cart-items">
         @foreach($items as $item)
         <div id="product_content_{{ $item->id}}" class="item-ticket">
-            <img class="cart-img" src="{{ 'images/products/' . $item->id . '.png' }}">
+            <img class="cart-img" src="{{ file_exists(public_path("storage/products/" . $item->id . "_1.png")) ? asset( 'storage/products/' . $item->id . '_1.png' ) : asset('images/products/default.png') }}">
             <div class="item-details">
                 <div class="item-name">{{ $item->product_name }}</div>
                 @if($item->discount)
@@ -64,7 +64,7 @@
     <div class="cart-checkout">
         <p>Resume</p>
         <p>Subtotal: <span id="subtotal">{{ number_format($totalPrice,2) }}</span>€</p>
-        <p>Shippment Cost: Free</p>
+        <p>Shipment Cost: Free</p>
         <p>Total: <span id="total">{{ number_format($totalPrice,2) }}</span>€</p>
         <a href="{{ route('checkoutPage') }}"><button>Checkout</button></a>
     </div>

@@ -16,7 +16,7 @@ function sendAjaxRequest(method, url, data, handler) {
 }
 
 function beginEditOrders(show_sections, edit_sections){
-    for (let i = 0; i < show_sections.length-1; i++) {
+    for (let i = 0; i < show_sections.length; i++) {
         const show_section = show_sections[i];
         const edit_section = edit_sections[i];
         const edit_button = show_section.querySelector('button.edit_order');
@@ -47,6 +47,7 @@ function editOrders(buttons){
 const editOrder_buttons = document.querySelectorAll('.save_order');
 const viewOrders = document.querySelectorAll('tr#showOrderInfo');
 const editOrder = document.querySelectorAll('tr#editOrderInfo');
+
 
 editOrders(editOrder_buttons);
 beginEditOrders(viewOrders, editOrder);

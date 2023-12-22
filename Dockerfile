@@ -13,5 +13,7 @@ COPY ./etc/nginx/default.conf /etc/nginx/sites-enabled/default
 COPY .env_production /var/www/.env
 COPY docker_run.sh /docker_run.sh
 
+RUN apt-get update && apt-get install -y cron
+
 # Start command
 CMD sh /docker_run.sh

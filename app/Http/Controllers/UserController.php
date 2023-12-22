@@ -12,6 +12,8 @@ use App\Models\Product;
 use App\Models\paymentTransaction;
 use App\Models\Discount;
 use App\Models\Report;
+use App\Models\Brand;
+use App\Models\Review;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,10 +44,47 @@ class UserController extends Controller
         return view('pages.edit_profile');
     }
 
+    public function userDetails($id)
+    {   
+        $user = User::where('id', $id)->first();
+        $orders = Order::where('user_id', $id)->get();
+        $reviews = Review::where('review.user_id', $id)
+            ->leftJoin('report', 'review.id', '=', 'report.review_id')
+            ->groupBy('review.id', 'report.review_id')
+            ->select('review.*', 'report.review_id')
+            ->get();
+        $reports = Report::where('user_id', $id)->get();
+        $blocked = false;
+        $status = blockAction::where('user_id', $user->id)->orderBy('id', 'desc')->first();
+        if ($status != null && $status->blocked_action == 'Blocking'){
+            $blocked = true;
+        }
+        $favourite = Order::where('orders.user_id', $id)
+            ->leftJoin('orderedproduct', 'orders.id', '=', 'orderedproduct.order_id')
+            ->leftJoin('product', 'orderedproduct.product_id', '=', 'product.id')
+            ->groupBy('product.id')
+            ->selectRaw('count(product.id) as product_count, product.*')
+            ->orderByDesc('product_count')
+            ->first();
+        $timesblocked = blockAction::where('user_id', $user->id)->where('blocked_action', 'Blocking')->count();
+        return view('pages.user_details')->with(['user' => $user, 'orders' => $orders, 'reviews' => $reviews, 'reports' => $reports, 'blocked' => $blocked, 'favourite' => $favourite, 'timesblocked' => $timesblocked]);
+    }
+
     public function adminUsers()
     {  
-        if (Auth::user()->id == 1){
-            $users = User::all();
+        if (Auth::user()->is_admin){
+            $authenticatedUser = Auth::user();
+
+            $request = request();
+
+            $sortColumn = $request->query('sort_column', 'username');
+            $sortDirection = $request->query('sort_direction', 'asc');
+
+            $users = User::where('id', '!=', $authenticatedUser->id)
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate(3)
+            ->withQueryString();
+
             $blocked = [];
             foreach ($users as $user){
                 $status = blockAction::where('user_id', $user->id)->orderBy('id', 'desc')->first();
@@ -65,15 +104,30 @@ class UserController extends Controller
     }
 
     public function adminProducts(){
-        if (Auth::user()->id == 1){
-            $products = Product::paginate(10);
+        if (Auth::user()->is_admin){
+
+            $request = request();
+
+            $sortColumn = $request->query('sort_column', 'product_name');
+            $sortDirection = $request->query('sort_direction', 'asc');
+
+            $products = Product::join('brand', 'product.brand_id', '=', 'brand.id')
+            ->select('product.*', 'brand.brand_name as brand_name')
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate(10)
+            ->withQueryString();
+
             $max_id = Product::all()->max('id') + 1;
             $categories = Category::all();
+            $brands = Brand::all();
+            $photos = Storage::files('public/products');
 
             return view('pages.admin_products')->with([
                 'products' => $products,
                 'categories' => $categories,
+                'brands' => $brands,
                 'max_id' => $max_id,
+                'photos' => $photos,
             ]);
         } 
         else{
@@ -82,8 +136,20 @@ class UserController extends Controller
     }
 
     public function adminOrders(){
-        if (Auth::user()->id == 1){
-            $orders = Order::all();
+
+
+        if (Auth::user()->is_admin){
+
+            $request = request();
+
+            $sortColumn = $request->query('sort_column', 'order_date');
+            $sortDirection = $request->query('sort_direction', 'desc');
+
+            $orders = Order::join('users', 'orders.user_id', '=', 'users.id')
+            ->select('orders.*', 'users.username as username')
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate(3)
+            ->withQueryString();
 
             return view('pages.admin_orders')->with([
                 'orders' => $orders
@@ -95,8 +161,18 @@ class UserController extends Controller
     }
 
     public function adminPromotions(){
-        if (Auth::user()->id == 1){
-            $promotions = Discount::all();
+        if (Auth::user()->is_admin){
+
+            $request = request();
+
+            $sortColumn = $request->query('sort_column', 'end_date');
+            $sortDirection = $request->query('sort_direction', 'asc');
+
+            $promotions = Discount::orderBy($sortColumn, $sortDirection)
+            ->paginate(3)
+            ->withQueryString();
+
+
             $max_id = Discount::all()->max('id') + 1;
             $products = Product::all();
 
@@ -112,8 +188,19 @@ class UserController extends Controller
     }
 
     public function adminReviews(){
-        if (Auth::user()->id == 1){
-            $reports = Report::all();
+        if (Auth::user()->is_admin){
+
+            $request = request();
+
+            $sortColumn = $request->query('sort_column', 'report_date');
+            $sortDirection = $request->query('sort_direction', 'asc');
+
+            $reports = Report::join('users', 'report.user_id', '=', 'users.id')
+            ->select('report.*', 'users.username as username')
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate(3)
+            ->withQueryString();
+
             return view('pages.admin_reviews')->with([
                 'reports' => $reports,
             ]);
@@ -121,6 +208,26 @@ class UserController extends Controller
         else{
             return redirect()->back();
         }
+    }
+
+    public function statistics(){
+        $favourites = Order::leftJoin('orderedproduct', 'orders.id', '=', 'orderedproduct.order_id')
+            ->leftJoin('product', 'orderedproduct.product_id', '=', 'product.id')
+            ->groupBy('product.id')
+            ->selectRaw('count(product.id) as product_count, product.*')
+            ->orderByDesc('product_count')
+            ->limit(5)
+            ->get();
+        $topCustomers = User::leftJoin('orders', 'users.id', '=', 'orders.user_id')
+            ->groupBy('users.id')
+            ->selectRaw('count(orders.id) as order_count, users.*')
+            ->orderByDesc('order_count')
+            ->limit(5)
+            ->get();
+        return view('pages.statistics')->with([
+            'topCustomers' => $topCustomers,
+            'favourites' => $favourites,
+        ]);
     }
     
     /**
@@ -187,7 +294,7 @@ class UserController extends Controller
         $id = User::where('username', $request->input('username'))->value('id');
 
         // Check if the current user is authorized to block this user.
-        if (!Auth::user()->id == 1){
+        if (!Auth::user()->is_admin){
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

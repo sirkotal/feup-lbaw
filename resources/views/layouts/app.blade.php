@@ -32,14 +32,15 @@
         <script type="text/javascript">
             // Fix for Firefox autofocus CSS bug
             // See: http://stackoverflow.com/questions/18943276/html-5-autofocus-messes-up-css-loading/18945951#18945951
-        </script>
+            </script>
+        <script type="text/javascript" src="https://js.pusher.com/7.0/pusher.min.js" defer></script>
         <script type="text/javascript" src="{{ URL::asset('js/header.js') }}" defer></script>
         <script type="text/javascript" src="{{ url('js/cart.js') }}" defer></script>
         <script type="text/javascript" src="{{ url('js/dropdown.js') }}" defer></script>
         <script type="text/javascript" src="{{ url('js/notifications.js') }}" defer></script>
         <script type="text/javascript" src="{{ url('js/wishlist.js') }}" defer></script>
         <script type="text/javascript" src="{{ url('js/filter.js') }}" defer></script>
-        <script type="text/javascript" src="{{ url('js/sort.js') }}" defer></script>
+        <script type="text/javascript" src="{{ url('js/product.js') }}" defer></script>
     </head>
     <body>
         <main>
@@ -62,11 +63,11 @@
                 <div class="col-md-3 text-center">
                     <h5>Payment Methods</h5>
                     <div class="payment-methods">
-                        <img src="{{ asset('images/mastercard-logo.png') }}">
-                        <img src="{{ asset('images/visa-logo.png') }}">
-                        <img src="{{ asset('images/ideal-logo.png') }}">
-                        <img src="{{ asset('images/klarna-logo.png') }}">
-                        <img src="{{ asset('images/bancontact-logo.png') }}">
+                        <img src="{{ asset('images/mastercard-logo.png') }}" alt="mastercard">
+                        <img src="{{ asset('images/visa-logo.png') }}" alt="visa">
+                        <img src="{{ asset('images/ideal-logo.png') }}" alt="ideal">
+                        <img src="{{ asset('images/klarna-logo.png') }}" alt="klarna">
+                        <img src="{{ asset('images/bancontact-logo.png') }}" alt="bancontact">
                     </div>
                 </div>
                 <div class="col-md-3 text-right">

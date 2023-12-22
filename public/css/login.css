@@ -30,6 +30,7 @@
 .left-login h1 {
     font-weight: bold;
     font-family: sans-serif;
+    font-size: 40px;
 }
 
 .right-login {
@@ -115,4 +116,35 @@
 
 #content > div > div > div > div > div.card-body > form > div.form-group.row.mb-0 > div > button{
     background-color:#00754D;
+}
+
+/* Responsive Stuff */
+@media screen and (max-width: 540px) {
+    .login-page {
+        flex-direction: column;
+    }
+
+    .left-login, .right-login {
+        flex: 1;
+        width: 100%;
+        height: auto;
+    }
+
+    .left-login h1 {
+        font-size: 24px;
+    }
+
+    .right-login h1 {
+        font-size: 22px;
+    }
+}
+
+@media screen and (max-width: 960px) {
+    .left-login h1 {
+        font-size: 32px;
+    }
+
+    .right-login h1 {
+        font-size: 30px;
+    }
 }

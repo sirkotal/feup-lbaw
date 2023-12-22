@@ -25,7 +25,6 @@ function add_to_wishlist_handler() {
 }
 
 function remove_from_wishlist_handler() {
-    location.reload();
     const {success, product_id} = JSON.parse(this.responseText);
     if(success){
         if(window.location.pathname == "/wishlist"){

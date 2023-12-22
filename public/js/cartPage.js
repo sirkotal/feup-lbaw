@@ -32,7 +32,7 @@ if(!isLoggedIn){
 
 function productInfoHandler() {
     const cart = JSON.parse(localStorage.getItem('cart'));
-    const {product_id, price, success, product_name, discount} = JSON.parse(this.responseText);
+    const {product_id, price, success, product_name, discount, product_path} = JSON.parse(this.responseText);
     if(discount == 0) {
         total += cart[product_id] * price;
     } else {
@@ -41,7 +41,7 @@ function productInfoHandler() {
     if(success) {
         document.querySelector('.cart-items').innerHTML += `
         <div id="product_content_${product_id}" class="item-ticket">
-            <img class="cart-img" src="images/products/${product_id}.png">
+            <img class="cart-img" ${product_path ? `src="storage/products/${product_id}_1.png"` : `src="images/products/default.png"`} >
             <div  class="item-details">
                 <div class="item-name">${product_name}</div>
                 ${discount === 0 ?

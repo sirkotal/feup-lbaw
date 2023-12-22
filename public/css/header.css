@@ -226,4 +226,11 @@ li:hover .dropdown-content {
   .footer-row {
     flex-wrap: nowrap;
   }
+  .cappuccino{
+    display: none;
+  }
+
+  .search-container{
+    max-width: 20px;
+  }
 }

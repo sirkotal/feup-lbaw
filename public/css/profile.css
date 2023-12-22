@@ -77,8 +77,18 @@
 
 #pfp{
     max-width: 20em;
+    max-height: 5em;
 }
 
 #content > div > div > div.col-md-4 > div > div > a{
     background-color: #00754D;
+}
+
+#editPhoto {
+    display: flex;
+}
+
+#editPhoto button {
+    cursor: pointer;
+    border-radius: 5px;
 }
